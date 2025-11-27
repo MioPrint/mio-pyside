@@ -1,0 +1,18 @@
+# Include the README and license
+# include README.md
+# include LICENSE
+
+# Include all resource files in the package
+recursive-include miowidgets/assets *
+
+# Include .ui, .qrc, .json, .csv files anywhere in the package
+recursive-include miowidgets *.ui *.qrc *.json *.csv *.png
+
+# Exclude compiled files and cache directories
+exclude *.pyc
+exclude __pycache__/*
+exclude *.egg-info
+exclude build/*
+exclude .vscode/*
+exclude *.code-workspace
+

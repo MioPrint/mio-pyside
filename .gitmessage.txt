@@ -1,0 +1,4 @@
+[INIT] Push Origin Master
+
+# Detailed description
+# Issue: #
