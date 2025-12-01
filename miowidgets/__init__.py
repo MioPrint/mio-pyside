@@ -14,7 +14,7 @@ from .filesystems.filesystems import QFileAndFolderSelection, QFileNavigationBar
 
 from .json.jsontree import QJsonTreeWidget
 
-
+from .consols.start_stop_process import QStartStopConsole
 
 
 
