@@ -1,4 +1,4 @@
-[INIT] Push Origin Master
+[Default] Commit Message
 
 # Detailed description
 # Issue: #
