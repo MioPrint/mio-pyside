@@ -17,7 +17,7 @@ setup(
     author= 'Miodrag Ignjatovic',
     author_email= '',
     description="A collection of reusable PySide6 widgets.",
-    url="https://github.com/yourusername/mywidgets",
+    url="https://github.com/MioPrint/mio-pyside",
 
     python_requires=">=3.11",
 

@@ -244,11 +244,12 @@ class QStartStopConsole(QWidget):
         self.output.moveCursor(QTextCursor.MoveOperation.End)
 
         self.output.moveCursor(QTextCursor.MoveOperation.End)
-        
+
     def closeEvent(self, event:QCloseEvent):
 
         if self.process_start.state() == QProcess.ProcessState.Running:
             self.process_start.kill()
+            self.process_start.waitForFinished()
 
             self.process_stop.start(self.stop_script)
             self.process_stop.waitForFinished()
