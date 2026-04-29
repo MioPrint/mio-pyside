@@ -19,7 +19,7 @@ setup(
     description="A collection of reusable PySide6 widgets.",
     url="https://github.com/MioPrint/mio-pyside",
 
-    python_requires=">=3.11",
+    python_requires=">=3.12",
 
     install_requires= [
         "PySide6>=6.5",
