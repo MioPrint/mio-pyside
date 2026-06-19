@@ -702,7 +702,7 @@ class QFileFilterProxy(QSortFilterProxyModel):
         self.setRecursiveFilteringEnabled(True)
         self.setDynamicSortFilter(True)
         
-        self._file_extensions = file_extensions
+        self._file_extensions = [ext.strip(".") for ext in file_extensions]
         self._startswith      = startswith_filter_strings
         self._contains        = contains_filter_strings
         self._endswith        = endswith_filter_strings
@@ -755,9 +755,12 @@ class QFileFilterProxy(QSortFilterProxyModel):
         #parent_path = parent_info.absoluteFilePath()
 
         name = file_info.fileName()
+        ext = file_info.suffix()
         path = file_info.absoluteFilePath()
 
-        #print(parent_path in model_root_path, file_info.isRoot() and model_root_path != "",  model_root_path, parent_path, path, )
+        # print(ext, self._file_extensions, ext == "", bool(self._file_extensions), ext in self._file_extensions)
+
+        # print(parent_path in model_root_path, file_info.isRoot() and model_root_path != "",  model_root_path, parent_path, path, )
 
         if path in model_root_path:
             if path in model._data:
@@ -769,6 +772,9 @@ class QFileFilterProxy(QSortFilterProxyModel):
                 model._data[path].checkState = Qt.CheckState.Unchecked
             return False
 
+        if self._file_extensions and ext != "" and ext not in self._file_extensions:
+            return False
+        
         if not (self._startswith or self._contains or self._endswith):
             return True
 

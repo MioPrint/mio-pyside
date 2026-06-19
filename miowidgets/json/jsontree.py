@@ -27,6 +27,7 @@ class QJsonTreeWidget(QWidget):
             single_selection        : bool= False,
             # --- Other --- #
             scrollbar_on_the_left   : bool= False,
+            header_labels           : list= [],
             parent:QWidget= None
             ):
 
@@ -36,25 +37,28 @@ class QJsonTreeWidget(QWidget):
 
         self.setMinimumSize(350, 200)
 
+        self._init_json_path = init_json_path
+
         global GLOBAL_WORKING_DIR
         self._local_working_dir = local_working_dir if local_working_dir is not None else GLOBAL_WORKING_DIR
 
         self._selectable_row        = selectable_row
         self._single_selection      = single_selection 
-        self._scrollbar_on_the_left     = scrollbar_on_the_left
+        self._scrollbar_on_the_left = scrollbar_on_the_left
+        self._header_labels         = header_labels
 
         # --- Model --- #
 
         self.model = QJsonModel(
-            init_json_path   = init_json_path,
+            init_json_path   = self._init_json_path,
             selectable_row   = self._selectable_row,
             single_selection = self._single_selection,
+            header_labels    = self._header_labels,
             parent= self
             )
         
         self.model.contentEdited.connect(self.contentEdited.emit)
         self.model.selectionChanged.connect(self.selectionChanged.emit)
-
         self.model.selectedJsonItemsChanged.connect(self.selectedJsonItemsChanged.emit)
 
         # --- View --- #
@@ -72,8 +76,18 @@ class QJsonTreeWidget(QWidget):
 
         layout_main_v = QVBoxLayout()
         layout_main_v.addWidget(self.tree)
+        layout_main_v.setContentsMargins(1,1,1,1)
 
         self.setLayout(layout_main_v)
+
+    def reloadFromFile(self):
+        self.model.loadFromJsonFile(self._init_json_path)
+        self.tree.resizeColumnToContents(0)
+    
+    def loadDict(self, input_dict:dict):
+        self.model.loadFromJsonDict(data=input_dict.copy())
+        self.tree.expandAll()
+        self.tree.resizeColumnToContents(0)
 
 class QJsonKeyItem(QStandardItem):
 
@@ -89,8 +103,8 @@ class QJsonKeyItem(QStandardItem):
             isTransposed : bool = False,
             ):
 
-        if dataType not in (str, bool, int, float, list, dict):
-            raise TypeError
+        if dataType not in (str, bool, int, float, list, dict, type(None)):
+            raise TypeError(key, dataType)
 
         super().__init__()
     
@@ -555,6 +569,24 @@ class QJsonItemDelegate(QStyledItemDelegate):
         super().updateEditorGeometry(editor, option, index)
 
 
+# class QDataDictWrapper(QJsonTreeWidget):
+
+#     def __init__(self,
+#             init_data_dict : dict,
+#             # --- Selection Settings --- #
+#             selectable_row          : bool= True, 
+#             single_selection        : bool= False,
+#             # --- Other --- #
+#             scrollbar_on_the_left   : bool= False,
+#             parent:QWidget= None
+#             ):
+
+#         super().__init__(
+#             selectable_row= selectable_row,
+#             single_selection= single_selection,
+#             scrollbar_on_the_left= scrollbar_on_the_left,
+#             parent= parent,
+#             )
 
 
 
