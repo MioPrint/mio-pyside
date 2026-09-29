@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mio_pyside"
+version = "0.1.0"
+description = "Custom Widgets based on PySide6"
+authors = [{name = "Miodrag Ignjatovic"}]
+requires-python = "==3.12.*"
+dependencies = [
+    "PySide6>=6.5",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest==9.1.1"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mio_pyside", "mio_pyside.*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+]

@@ -1,4 +1,0 @@
-[Default] Commit Message
-
-# Detailed description
-# Issue: #

@@ -1,5 +1,22 @@
-__pycache__
+# General
+*.log
+*.vscode
 *.code-workspace
-/.vscode
-/miopyside.egg-info
-/build
+*.tmp
+.tmp/
+
+# Python 
+__pycache__/
+*.pyc
+.pytest_cache/
+build/
+dist/
+typings/
+*.egg-info/
+
+# In-repo venvs and env files 
+.install_logs/
+.venv/
+venv/
+.env
+.env.*
