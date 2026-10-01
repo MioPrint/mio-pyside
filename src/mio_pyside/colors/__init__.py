@@ -1,2 +1,2 @@
 
-from .palette import palette_colors
+from .palette import *

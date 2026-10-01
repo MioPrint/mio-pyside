@@ -6,7 +6,7 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 
-from mio_pyside.buttons.buttons import QLoadFileButton, QSaveFileButton
+from ..buttons import QLoadFileButton, QSaveFileButton
 
 import pandas as pd
 import numpy as np

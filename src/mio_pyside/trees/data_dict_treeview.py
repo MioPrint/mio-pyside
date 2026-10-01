@@ -7,8 +7,8 @@ from PySide6.QtCore import *
 
 import numpy as np
 
-from mio_pyside.spinboxes.spinboxes import QNumpyUIntSpinBox, QNumpyInt64SpinBox
-from mio_pyside.colors.palette import color_amber_70p
+from ..spinboxes import QNumpyUIntSpinBox, QNumpyInt64SpinBox
+from ..colors.palette import color_amber_70p
 
 # ----------------- #
 # --- Tree View --- #

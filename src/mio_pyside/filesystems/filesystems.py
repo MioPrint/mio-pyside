@@ -5,10 +5,9 @@ from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 
-from ..buttons.buttons import QLoadFolderButton
+from ..buttons import QLoadFolderButton
 from ..config import GLOBAL_WORKING_DIR, WorkingDir
-from ..utils.decorators import block_signals, wait_cursor
-from ..utils.format import format_file_size
+from ..utils import block_signals, wait_cursor, format_file_size
 
 class QFileAndFolderSelection(QWidget):
 

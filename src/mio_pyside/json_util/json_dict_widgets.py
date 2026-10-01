@@ -7,9 +7,9 @@ from PySide6.QtCore import *
 
 from collections import namedtuple
 
-from mio_pyside.config import GLOBAL_WORKING_DIR, WorkingDir
-from mio_pyside.buttons.buttons import QLoadFileButton, QSaveFileButton
-from mio_pyside.utils.decorators import wait_cursor
+from ..config import GLOBAL_WORKING_DIR, WorkingDir
+from ..buttons import QLoadFileButton, QSaveFileButton
+from ..utils import wait_cursor
 
 DictWidgetElement = namedtuple(
     typename= "WidgetElement", 
@@ -17,7 +17,7 @@ DictWidgetElement = namedtuple(
     defaults= [None, [], None, None, True],
     )
 
-class json_array_widget(QWidget):
+class QJsonArrayWidget(QWidget):
 
     array_changed = Signal(list)
 
@@ -223,7 +223,7 @@ class json_array_widget(QWidget):
 
         self.init_widgets(values_list= values_list)
 
-class json_dict_widget(QWidget):
+class QJsonDictWidget(QWidget):
 
     dict_changed = Signal(dict)
 
@@ -340,7 +340,7 @@ class json_dict_widget(QWidget):
                     widget_element.valueChanged.connect(self.on_widget_changed)
 
                 elif isinstance(value.default, list):
-                    widget_element = json_array_widget(element= value, parent=new_parent)
+                    widget_element = QJsonArrayWidget(element= value, parent=new_parent)
                     widget_element.setEnabled(value.enabled)
                     widget_element.array_changed.connect(self.on_widget_changed)
                 
@@ -414,7 +414,7 @@ class json_dict_widget(QWidget):
             elif isinstance(widget_element, QDoubleSpinBox):
                 values_dict[key] = widget_element.value()
             
-            elif isinstance(widget_element, json_array_widget):
+            elif isinstance(widget_element, QJsonArrayWidget):
                 values_dict[key] = widget_element.values_list
 
             else:
@@ -471,7 +471,7 @@ class json_dict_widget(QWidget):
             elif isinstance(widget_element, (QSpinBox, QDoubleSpinBox)):
                 widget_element.setValue(value)
 
-            elif isinstance(widget_element, json_array_widget):
+            elif isinstance(widget_element, QJsonArrayWidget):
                 widget_element.set_values_list(value)
             
             else:

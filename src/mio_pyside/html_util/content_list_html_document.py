@@ -11,7 +11,7 @@ import pandas as pd
 
 from .basic_html_document import BasicHtmlDocumentWidget
 
-class content_list_html_document_widget(BasicHtmlDocumentWidget):
+class ContentListHtmlDocumentWidget(BasicHtmlDocumentWidget):
 
     def __init__(self,
             parent:QWidget= None,
