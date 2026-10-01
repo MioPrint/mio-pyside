@@ -8,9 +8,9 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from mio_pyside.config import GLOBAL_WORKING_DIR, WorkingDir
 
-from .content_list_html_document import get_html_string_from_content_list
+from .content_list_functions import get_html_string_from_content_list
 
-class BasicHtmlDocumentWidget(QWidget): #, src.widget_mixin_input_folder_path):
+class BasicHtmlDocumentWidget(QWidget):
 
     html_updated = Signal(str)
 
@@ -148,7 +148,6 @@ class BasicHtmlDocumentWidget(QWidget): #, src.widget_mixin_input_folder_path):
             fail_html_str = get_html_string_from_content_list([fail_string])
 
             self.web_engine_view_widget.setHtml(fail_html_str)
-
 
     ### SETs ###
 
