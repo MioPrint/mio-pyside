@@ -2,18 +2,18 @@
 
 import sys, os, logging, time, typing, json
 
-from PySide6.QtCore import Qt, Signal, Slot, QDir, QFile, QSaveFile, QAbstractTableModel
-from PySide6.QtWidgets import QWidget, QPushButton, QStyle, QFileDialog, QTableView, QAbstractScrollArea, QApplication, QHBoxLayout, QVBoxLayout, QLabel, QCheckBox, QHeaderView
-from PySide6.QtGui import QIcon, QAction, QWheelEvent, QColor, QKeySequence, QShortcut
+from PySide6.QtCore import *
+from PySide6.QtWidgets import *
+from PySide6.QtGui import *
 
-from ..buttons.buttons import QLoadFileButton, QSaveFileButton
+from mio_pyside.buttons.buttons import QLoadFileButton, QSaveFileButton
 
 import pandas as pd
 import numpy as np
 
-##################
-### QTableView ###
-##################
+# ------------------ #
+# --- Table View --- #
+# ------------------ #
 
 class QBasicTableView(QTableView):
 
@@ -22,13 +22,13 @@ class QBasicTableView(QTableView):
     dataframe_updated = Signal(pd.DataFrame)
     
     def __init__(self, 
-                 editable_table:bool= False, 
-                 transposed_display:bool= False, 
-                 resize_columns:bool= True,
-                 tight_on:bool= False,
-                 scroll_bar_on:bool= True,
-                 parent:QWidget=None
-                 ):
+            editable_table:bool= False, 
+            transposed_display:bool= False, 
+            resize_columns:bool= True,
+            tight_on:bool= False,
+            scroll_bar_on:bool= True,
+            parent:QWidget=None
+            ):
         
         super(QBasicTableView, self).__init__(parent)
         
@@ -56,20 +56,10 @@ class QBasicTableView(QTableView):
 
         self.update_table(pd.DataFrame())
 
-
-
-        # copy_action = QAction("CopyTable", self)
-        # # copy_action.setShortcut("Ctrl+C")
-        # copy_action.setShortcut(QKeySequence.StandardKey.Copy)
-        # copy_action.triggered.connect(self.copy_selected_cells)
-        # self.addAction(copy_action)
-
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.shortcut = QShortcut(QKeySequence("Ctrl+C"), self)
         self.shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self.shortcut.activated.connect(self.copy_selected_cells)
-
-
 
     def clear_table(self):
 
@@ -86,12 +76,12 @@ class QBasicTableView(QTableView):
 
     def update_dataframe_from_dict(self, input_dict:dict):
 
-        dataframe_from_dict = pd.DataFrame([input_dict]) #.from_dict(input_dict)
+        dataframe_from_dict = pd.DataFrame([input_dict])
         self.validate_dataframe(dataframe_from_dict)
 
     def read_dataframe_from_csv(self, input_path, delimiter:str=','):
 
-        input_dataframe = pd.read_csv(input_path, delimiter=delimiter)#on_bad_lines='warn')
+        input_dataframe = pd.read_csv(input_path, delimiter=delimiter)
         self.validate_dataframe(input_dataframe)
     
     def validate_dataframe(self, input_dataframe:pd.DataFrame, emit:bool=True):
@@ -113,9 +103,9 @@ class QBasicTableView(QTableView):
         self.display_dataframe = input_dataframe
 
         if self.editable_table:
-            self.table_model = editable_table_model_dataframe(input_dataframe)
+            self.table_model = QEditableTableModelDataframe(input_dataframe)
         else:
-            self.table_model = display_table_model_dataframe(input_dataframe)
+            self.table_model = QDisplayTableModelDataframe(input_dataframe)
 
         self.setModel(self.table_model)
 
@@ -164,7 +154,6 @@ class QBasicTableView(QTableView):
         if not selected_indexes:
             return
 
-        # Sort indexes to ensure correct order for copying (row-major)
         selected_indexes.sort(key=lambda x: (x.row(), x.column()))
 
         copied_text = []
@@ -190,11 +179,11 @@ class QBasicTableView(QTableView):
         clipboard.setText(clipboard_text)
         print("Copied to clipboard:\n", clipboard_text)
 
-###############
-### QWidget ###
-###############
+# -------------- #
+# --- Widget --- #
+# -------------- #
 
-class sheet_display_widget(QWidget):
+class QSheetDisplayWidget(QWidget):
 
     csv_loaded_from_file = Signal(str)
 
@@ -211,7 +200,6 @@ class sheet_display_widget(QWidget):
 
         if parent is None:
             self.setWindowTitle(window_title)
-        #self.setMinimumSize(800, 600)
         
         self.df = pd.DataFrame()
 
@@ -219,7 +207,6 @@ class sheet_display_widget(QWidget):
 
         ### WIDGETS ### 
         self.basic_table = QBasicTableView(resize_columns=False, tight_on=adjust_column_widths)
-
 
         if adjust_column_widths:
             self.basic_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
@@ -237,13 +224,6 @@ class sheet_display_widget(QWidget):
         self.button_load_table_from_csv = QSaveFileButton(target_extension='.csv', button_text= ' Save to .csv ', parent= self)
         self.button_load_table_from_csv.setEnabled(enable_load_button)
         self.button_load_table_from_csv.file_abspath_selected.connect(self.on_button_load_table_from_csv_click)
-
-        #self.button_save_table_to_csv = QPushButton(' Save to .csv ')
-        #self.button_save_table_to_csv.setIcon(QIcon(qApp.style().standardIcon(QStyle.StandardPixmap.SP_DialogSaveButton)))
-        #self.button_save_table_to_csv.clicked.connect(self.on_button_save_table_to_csv_click)
-        #self.button_load_table_from_csv = QPushButton(' Load from .csv ')
-        #self.button_load_table_from_csv.setIcon(QIcon(qApp.style().standardIcon(QStyle.StandardPixmap.SP_FileIcon)))
-        #self.button_load_table_from_csv.clicked.connect(self.on_button_load_table_from_csv_click)
 
         self.checkbox_transpose = QCheckBox('Transpose', parent=self)
         self.checkbox_transpose.setChecked(self.is_transposed)
@@ -329,14 +309,14 @@ class QBasicTableWidget(QWidget):
     dataframe_updated = Signal(pd.DataFrame)
 
     def __init__(self, 
-                editable_table:bool= False, 
-                transposed_display:bool= False, 
-                resize_columns:bool= True,
-                tight_on:bool= False,
-                scroll_bar_on:bool= True,
-                delimiter:str=',',
-                parent:QWidget= None,
-                ):
+            editable_table:bool= False, 
+            transposed_display:bool= False, 
+            resize_columns:bool= True,
+            tight_on:bool= False,
+            scroll_bar_on:bool= True,
+            delimiter:str=',',
+            parent:QWidget= None,
+            ):
         
         super().__init__(parent)
 
@@ -392,7 +372,6 @@ class QBasicTableWidget(QWidget):
         layout_main_v = QVBoxLayout()
         layout_main_v.addWidget(self.basic_table_view, 1)
         layout_main_v.addLayout(layout_table_footer)
-        #layout_main_v.setContentsMargins(0,0,0,0)
 
         self.setLayout(layout_main_v)
 
@@ -406,9 +385,7 @@ class QBasicTableWidget(QWidget):
     def on_save_table_to_csv(self, csv_abspath:str):
 
         self.basic_table_view.dataframe.to_csv(csv_abspath, index=False)
-
         self.default_file_name = os.path.basename(csv_abspath)
-
         logging.info(f' table saved to {csv_abspath}')
 
     #@src.wait_cursor_on_call()
@@ -416,29 +393,171 @@ class QBasicTableWidget(QWidget):
     def on_load_table_from_csv(self, csv_abspath:str):
 
         self.basic_table_view.read_dataframe_from_csv(csv_abspath, delimiter= self.delimiter)
-
         self.default_file_name = os.path.basename(csv_abspath)
-
         self.csv_file_abspath.setText(csv_abspath)
-
         logging.info(f' loading csv done from {csv_abspath}')
-
         self.csv_loaded_from_file.emit(csv_abspath)
 
     def set_dataframe(self, dataframe:pd.DataFrame):
 
         self.basic_table_view.update_dataframe_from_input_dataframe(dataframe, emit=False)
-
         self.dataframe = dataframe
 
-################
-### NOT USED ###
-################
+# -------------------- #
+# --- Table Widget --- #
+# -------------------- #
 
-class display_table_model_dataframe(QAbstractTableModel):
+class QWidgetsInTableWidget(QTableWidget):
+
+    def __init__(self,
+            resize_columns:bool= True,
+            scroll_bar_on:bool= False
+            ):
+
+        super(QWidgetsInTableWidget, self).__init__()
+
+        self.resize_columns = resize_columns
+
+        self.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+
+        if not scroll_bar_on:
+            self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+            self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        self.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        self.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
+
+    def clear_table(self):
+
+        self.configure_table(pd.DataFrame())
+
+    def configure_table(self, input_dataframe:pd.DataFrame):
+
+        self.dataframe = input_dataframe
+        
+        self.setRowCount(len(self.dataframe.index))
+        self.setColumnCount(len(self.dataframe.columns))
+
+        row_labels = [str(index) if not isinstance(index, str) else index for index in self.dataframe.index]
+
+        self.setVerticalHeaderLabels(row_labels)
+        self.setHorizontalHeaderLabels(self.dataframe.columns)
+
+        for r, (row_index, row) in enumerate(self.dataframe.iterrows()):
+            for c, (column_index, cell_value) in enumerate(row.items()):
+
+                if isinstance(cell_value, QWidget):
+
+                    layout = QHBoxLayout()
+
+                    if isinstance(cell_value, QSpinBox):
+                        layout.addWidget(cell_value, alignment= Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+
+                    elif isinstance(cell_value, QDoubleSpinBox):
+                        layout.addWidget(cell_value, alignment= Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    
+                    elif isinstance(cell_value, QCheckBox):
+                        layout.addWidget(cell_value, alignment= Qt.AlignmentFlag.AlignCenter)
+                    
+                    else:
+                        layout.addWidget(cell_value, alignment= Qt.AlignmentFlag.AlignCenter)
+
+                    layout.setContentsMargins(1,1,1,1)
+
+                    widget_container = QWidget()
+                    widget_container.setLayout(layout)
+
+                    self.setCellWidget(r, c, widget_container)
+
+                elif isinstance(cell_value, type(None)):
+                    self.setCellWidget(r, c, QLabel())
+
+                else:
+                    item = QTableWidgetItem(cell_value)
+                    self.setItem(r, c, item)
+                    
+        if self.resize_columns:
+            self.setVisible(False)
+            self.resizeColumnsToContents()
+            self.resizeRowsToContents()
+            self.setVisible(True)
+
+    def get_widget_values(self):
+        
+        return_df = self.dataframe.copy()
+
+        for row_index, row in self.dataframe.iterrows():
+            for column_index, cell_widget in row.items():
+
+                if isinstance(cell_widget, QSpinBox):
+                    return_df.at[row_index, column_index] = cell_widget.value()
+
+                if isinstance(cell_widget, QDoubleSpinBox):
+                    return_df.at[row_index, column_index] = cell_widget.value()
+
+                elif isinstance(cell_widget, QCheckBox):
+                    if cell_widget.checkState() == 0:
+                        return_df.at[row_index, column_index] = False
+                    elif cell_widget.checkState() > 0:
+                        return_df.at[row_index, column_index] = True
+
+                elif isinstance(cell_widget, QPushButton):
+                    return_df.at[row_index, column_index] = cell_widget.text()
+
+                elif isinstance(cell_widget, QLabel):
+                    if cell_widget.text() == '':
+                        return_df.at[row_index, column_index] = None
+                    else:
+                        return_df.at[row_index, column_index] = cell_widget.text()
+
+                elif isinstance(cell_widget, QLineEdit):
+                    return_df.at[row_index, column_index] = cell_widget.text()
+
+        return return_df
+
+    def set_widget_values(self, input_dataframe:pd.DataFrame):
+
+        for row_index, row in self.dataframe.iterrows():
+            for column_index, cell_widget in row.items():
+
+                if isinstance(cell_widget, QSpinBox):
+                    cell_widget.setValue(input_dataframe.at[row_index, column_index])
+
+                if isinstance(cell_widget, QDoubleSpinBox):
+                    cell_widget.setValue(input_dataframe.at[row_index, column_index])
+
+                elif isinstance(cell_widget, QCheckBox):
+                    cell_widget.setChecked(input_dataframe.at[row_index, column_index])
+
+                elif isinstance(cell_widget, QLabel):
+                    cell_widget.setText(input_dataframe.at[row_index, column_index])
+
+                elif isinstance(cell_widget, QLineEdit):
+                    cell_widget.setText(input_dataframe.at[row_index, column_index])
+
+    def resize_vertical_header_to_largest_cell_height(self):
+
+        self.setVisible(False)
+        max_height = 0
+        for r, (row_index, row) in enumerate(self.dataframe.iterrows()):
+            max_height = max(max_height, self.verticalHeader().sectionSize(r))
+            for column_index, cell_widget in row.items():
+                if isinstance(cell_widget, QWidget):
+                    max_height = max(max_height, cell_widget.sizeHint().height())
+
+        self.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
+        self.verticalHeader().setDefaultSectionSize(max_height)
+        self.setVisible(True)
+
+# -------------------- #
+# --- Table Models --- #
+# -------------------- #
+
+class QDisplayTableModelDataframe(QAbstractTableModel):
 
     def __init__(self, init_dataframe:pd.DataFrame):
-        super(display_table_model_dataframe, self).__init__()
+        super(QDisplayTableModelDataframe, self).__init__()
         
         self.df = init_dataframe
 
@@ -457,19 +576,14 @@ class display_table_model_dataframe(QAbstractTableModel):
     #def dataChanged(self, index_1, index_2):
     #    pass
 
-    def data(self, index, role):
+    def data(self, index:QModelIndex, role:int):
 
         if index.isValid():
         
             value = self.df.iloc[index.row(), index.column()]
             column_name = self.df.columns[index.column()]
 
-            if role == Qt.UserRole:
-                # Qt.UserRole = 0x0100
-                pass
-
-            if role == Qt.DisplayRole:
-                # Qt.DisplayRole = 0
+            if role == Qt.ItemDataRole.DisplayRole:
 
                 if isinstance(value, int):
                     return str(value)
@@ -484,93 +598,47 @@ class display_table_model_dataframe(QAbstractTableModel):
                     else:
                         return '"%s"' % value
                 
-                # last return
                 return str(value)
             
-            if role == Qt.DecorationRole: 
-                # Qt.DecorationRole = 1
+            if role == Qt.ItemDataRole.DecorationRole: 
                 pass
             
-            '''
-            if role == Qt.EditRole:
-                # Qt.EditRole = 2
-                return str(value)
-            '''
-
-            if role == Qt.ToolTipRole:
-                # Qt.ToolTipRole = 3
-                pass
-
-            if role == Qt.StatusTipRole:
-                # Qt.StatusTipRole = 4
-                pass
-            
-            if role == Qt.WhatsThisRole:
-                # Qt.WhatsThisRole = 5
-                pass
-
-            if role == Qt.FontRole:
-                # Qt.FontRole = 6
-                pass
-
-            if role == Qt.TextAlignmentRole:
-                # Qt.TextAlignmentRole = 7
-                return Qt.AlignVCenter + Qt.AlignHCenter
-            
-            if role == Qt.BackgroundRole:
-                # Qt.BackgroundRole = 8
+            if role == Qt.ItemDataRole.BackgroundRole:
                 background_color = self.background_colors_df.iloc[index.row(), index.column()]
                 if background_color is not None:
                     return background_color
                 else:
                     return QColor('white')
 
-            if role == Qt.ForegroundRole:
-                # Qt.ForegroundRole = 9
+            if role == Qt.ItemDataRole.ForegroundRole:
                 foreground_color = self.foreground_colors_df.iloc[index.row(), index.column()]
                 if foreground_color is not None:
                     return foreground_color
                 else:
                     return QColor('black')
             
-            if role == Qt.CheckStateRole:
-                # Qt.CheckStateRole = 10
-                pass
-
-            if role == Qt.AccessibleTextRole:
-                # Qt.AccessibleTextRole = 11
-                pass
-
-            if role == Qt.AccessibleDescriptionRole:
-                # Qt.AccessibleDescriptionRole = 12
-                pass
-
-            if role == Qt.SizeHintRole:
-                # Qt.SizeHintRole = 13
-                pass
-
         else:
             return False
                     
-    def rowCount(self, index):
+    def rowCount(self, index:QModelIndex):
         return self.df.shape[0]
 
-    def columnCount(self, index):
+    def columnCount(self, index:QModelIndex):
         return self.df.shape[1]
 
     def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and not self.df.empty:
+        if role == Qt.ItemDataRole.DisplayRole and not self.df.empty:
 
-            if orientation == Qt.Horizontal:
+            if orientation == Qt.Orientation.Horizontal:
                 return str(self.df.columns[section])
 
-            if orientation == Qt.Vertical:
+            if orientation == Qt.Orientation.Vertical:
                 return str(self.df.index[section])
 
-class editable_table_model_dataframe(QAbstractTableModel):
+class QEditableTableModelDataframe(QAbstractTableModel):
 
     def __init__(self, init_dataframe:pd.DataFrame):
-        super(editable_table_model_dataframe, self).__init__()
+        super(QEditableTableModelDataframe, self).__init__()
         
         self.df = init_dataframe
 
@@ -589,19 +657,14 @@ class editable_table_model_dataframe(QAbstractTableModel):
     #def dataChanged(self, index_1, index_2):
     #    pass
 
-    def data(self, index, role):
+    def data(self, index:QModelIndex, role:int):
 
         if index.isValid():
 
             value = self.df.iloc[index.row(), index.column()]
             column_name = self.df.columns[index.column()]
 
-            if role == Qt.UserRole:
-                # Qt.UserRole = 0x0100
-                pass
-
-            if role == Qt.DisplayRole:
-                # Qt.DisplayRole = 0
+            if role == Qt.ItemDataRole.DisplayRole:
 
                 if isinstance(value, int):
                     return str(value)
@@ -616,91 +679,44 @@ class editable_table_model_dataframe(QAbstractTableModel):
                     else:
                         return '"%s"' % value
                 
-                # last return
                 return str(value)
             
-            if role == Qt.DecorationRole: 
-                # Qt.DecorationRole = 1
-                pass
-
-            if role == Qt.EditRole:
-                # Qt.EditRole = 2
-                return str(value)
-            
-            if role == Qt.ToolTipRole:
-                # Qt.ToolTipRole = 3
-                pass
-
-            if role == Qt.StatusTipRole:
-                # Qt.StatusTipRole = 4
-                pass
-            
-            if role == Qt.WhatsThisRole:
-                # Qt.WhatsThisRole = 5
-                pass
-
-            if role == Qt.FontRole:
-                # Qt.FontRole = 6
-                pass
-
-            if role == Qt.TextAlignmentRole:
-                # Qt.TextAlignmentRole = 7
-                return Qt.AlignVCenter + Qt.AlignHCenter
-            
-            if role == Qt.BackgroundRole:
-                # Qt.BackgroundRole = 8
+            if role == Qt.ItemDataRole.BackgroundRole:
                 background_color = self.background_colors_df.iloc[index.row(), index.column()]
                 if background_color is not None:
                     return background_color
                 else:
                     return QColor('white')
 
-            if role == Qt.ForegroundRole:
-                # Qt.ForegroundRole = 9
+            if role == Qt.ItemDataRole.ForegroundRole:
                 foreground_color = self.foreground_colors_df.iloc[index.row(), index.column()]
                 if foreground_color is not None:
                     return foreground_color
                 else:
                     return QColor('black')
             
-            if role == Qt.CheckStateRole:
-                # Qt.CheckStateRole = 10
-                pass
-
-            if role == Qt.AccessibleTextRole:
-                # Qt.AccessibleTextRole = 11
-                pass
-
-            if role == Qt.AccessibleDescriptionRole:
-                # Qt.AccessibleDescriptionRole = 12
-                pass
-
-            if role == Qt.SizeHintRole:
-                # Qt.SizeHintRole = 13
-                pass
-
         else:
             return False
                     
-    def rowCount(self, index):
+    def rowCount(self, index:QModelIndex):
         return self.df.shape[0]
 
-    def columnCount(self, index):
+    def columnCount(self, index:QModelIndex):
         return self.df.shape[1]
 
-    def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and not self.df.empty:
-            if orientation == Qt.Horizontal:
+    def headerData(self, section:int, orientation:Qt.Orientation, role:int):
+        if role == Qt.ItemDataRole.DisplayRole and not self.df.empty:
+            if orientation == Qt.Orientation.Horizontal:
                 return str(self.df.columns[section])
 
-            if orientation == Qt.Vertical:
+            if orientation == Qt.Orientation.Vertical:
                 return str(self.df.index[section])
             
-    def setData(self, index, value, role):
+    def setData(self, index:QModelIndex, value, role:int):
         if index.isValid():
-            if role == Qt.EditRole:
+            if role == Qt.ItemDataRole.EditRole:
                 self.df.iloc[index.row(), index.column()] = value
-                self.dataChanged.emit(index, index, [Qt.UserRole, Qt.DisplayRole])
+                self.dataChanged.emit(index, index, [Qt.ItemDataRole.UserRole, Qt.ItemDataRole.DisplayRole])
                 self.background_colors_df = pd.DataFrame().reindex_like(self.df)
                 self.foreground_colors_df = pd.DataFrame().reindex_like(self.df)
                 return True
@@ -709,12 +725,11 @@ class editable_table_model_dataframe(QAbstractTableModel):
         else:
             return False
 
-    def flags(self, index):
+    def flags(self, index:QModelIndex):
         flags = super(self.__class__,self).flags(index)
-        flags |= Qt.ItemIsEditable
-        flags |= Qt.ItemIsSelectable
-        flags |= Qt.ItemIsEnabled
-        flags |= Qt.ItemIsDragEnabled
-        flags |= Qt.ItemIsDropEnabled
+        flags |= Qt.ItemFlag.ItemIsEditable
+        flags |= Qt.ItemFlag.ItemIsSelectable
+        flags |= Qt.ItemFlag.ItemIsEnabled
+        flags |= Qt.ItemFlag.ItemIsDragEnabled
+        flags |= Qt.ItemFlag.ItemIsDropEnabled
         return flags
-

@@ -900,16 +900,3 @@ class QFileSystemTreeView(QTreeView):
     
             if self.verticalScrollBar().isVisible():
                 event.accept()
-
-
-
-
-
-
-
-
-
-
-
-
-

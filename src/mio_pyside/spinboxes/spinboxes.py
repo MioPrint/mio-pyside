@@ -144,5 +144,3 @@ class QNumpyInt64SpinBox(QDoubleSpinBox):
     def numpyIntValue(self):
         
         return self.dtype.type(self.value())
-
-

@@ -31,4 +31,3 @@ def wait_cursor(func):
             QApplication.restoreOverrideCursor()
         
     return wrapper
-

@@ -29,4 +29,3 @@ class QMioWidget(QWidget):
         layout_main_v = QVBoxLayout()
         
         self.setLayout(layout_main_v)
-

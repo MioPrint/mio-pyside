@@ -22,14 +22,3 @@ class QMioMainWindow(QMainWindow):
 
         self.setCentralWidget(self.mainwidget)
         self.show()
-
-
-
-
-
-
-
-
-
-
-

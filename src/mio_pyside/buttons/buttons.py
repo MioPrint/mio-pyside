@@ -158,10 +158,3 @@ class QSaveFileButton(QPushButton):
             
             self.file_abspath_selected.emit(selected_file)
             self.file_QSaveFile_selected.emit(QSaveFile(selected_file))
-
-
-
-
-
-
-
