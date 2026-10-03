@@ -114,10 +114,10 @@ class DataDictTreeView(QTreeView):
         self.setAllColumnsShowFocus(True)
         self.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
 
-        self.setStyleSheet("""
-            QTreeView::item { border-right: 1px solid lightgray;  /* Vertical lines between columns */ }
-            QTreeView::item:selected { color: black; }
-            """)
+        # self.setStyleSheet("""
+        #     QTreeView::item { border-right: 1px solid lightgray;  /* Vertical lines between columns */ }
+        #     QTreeView::item:selected { color: black; }
+        #     """)
         #QTreeView::item:selected { color: blue; background-color: lightblue; }
 
         self.header().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
