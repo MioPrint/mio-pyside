@@ -20,7 +20,7 @@ class QCollapsibleBox(QWidget):
             parent         : QWidget = None,
             ):
 
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         if isinstance(parent, QScrollAreaForCollapsibleBoxes):
             self.box_has_changed.connect(parent.adjust_scroll_area_width)

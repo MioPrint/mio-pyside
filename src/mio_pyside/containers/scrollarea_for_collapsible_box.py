@@ -9,7 +9,7 @@ class QScrollAreaForCollapsibleBoxes(QScrollArea):
             parent : QWidget = None,
             ):
 
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         self.container_widget = QWidget()
         self.setWidget(self.container_widget)

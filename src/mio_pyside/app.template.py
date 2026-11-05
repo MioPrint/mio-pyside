@@ -14,6 +14,7 @@ def main():
     if app is None:
         app = QApplication(sys.argv)
     
+    #print(QStyleFactory.keys()) # ['windows11', 'windowsvista', 'Windows', 'Fusion']
     app.setStyle("Fusion")
     style = QStyleFactory.create("Fusion")
     app.setPalette(style.standardPalette())

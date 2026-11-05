@@ -12,7 +12,7 @@ class QTabsWithOrderMemory(QTabWidget):
             *args, **kwargs
             ):
         
-        super().__init__(parent=parent, *args, **kwargs)
+        super().__init__(parent, *args, **kwargs)
 
         self.memory_dict = memory_dict
         self.memory_key = memory_key

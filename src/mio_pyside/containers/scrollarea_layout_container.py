@@ -10,7 +10,7 @@ class QScrollAreaLayoutContainer(QScrollArea):
             parent : QWidget = None,
             ):
         
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         self.setWidgetResizable(True) 
         self.setFrameShape(QFrame.Shape.NoFrame)
