@@ -1,28 +1,24 @@
 
 from PySide6.QtWidgets import *
-from PySide6.QtGui import *
 from PySide6.QtCore import *
+from PySide6.QtGui import *
 
-class FrameSelectionWidget(QWidget):
+class QFrameSelectionWidget(QWidget):
 
     index_updated = Signal(int)
 
     def __init__(self, 
-            min_index:int= 0, 
-            max_index:int= 100,
-            parent:QWidget= None,
+            min_index : int = 0, 
+            max_index : int = 100,
+            parent    : QWidget = None,
             ):
 
-        super(FrameSelectionWidget, self).__init__(parent)
-
-        ### FRAME SELECTION VARIABLES ###
+        super().__init__(parent=parent)
 
         self.FRAME_SELECTION_TEMPLATE = "Frame Selection (index) ({idx_min},{idx_max})"
         self.min_index = min_index
         self.max_index = max_index
         self.current_index = self.min_index
-
-        ### FRAME SELECTION WIDGETS ###
 
         selection_text = self.FRAME_SELECTION_TEMPLATE.format(
             idx_min=self.min_index,
@@ -51,10 +47,6 @@ class FrameSelectionWidget(QWidget):
         self.button_frame_selection_last.setIcon(QIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaSkipForward)))
         self.button_frame_selection_last.clicked.connect(self.on_button_frame_selection_last_clicked)
         
-        ##############
-        ### LAYOUT ###
-        ##############
-
         layout_buttons = QHBoxLayout()
         layout_buttons.addWidget(self.button_frame_selection_first, alignment=Qt.AlignmentFlag.AlignCenter)
         layout_buttons.addWidget(self.button_frame_selection_previous, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -68,13 +60,11 @@ class FrameSelectionWidget(QWidget):
         layout.addLayout(layout_buttons)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         layout.setContentsMargins(0,0,0,0)
-        #print(layout.getContentsMargins())
         
         self.setLayout(layout)
         self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
-    ### FRAME SELECTION WIDGET SIGNALS ###
-
+    @Slot()
     def on_lineedit_frame_selection_enter(self):
 
         old_idx = self.current_index
@@ -108,29 +98,36 @@ class FrameSelectionWidget(QWidget):
             else:
                 return False
 
+    @Slot()
     def on_button_frame_selection_first_clicked(self):
+
         self.current_index = self.min_index
         self.update_frame_selection_options()
         self.index_updated.emit(self.current_index)
         
+    @Slot()
     def on_button_frame_selection_previous_clicked(self):
+
         self.current_index = self.current_index - 1
         self.update_frame_selection_options()
         self.index_updated.emit(self.current_index)
         
+    @Slot()
     def on_button_frame_selection_next_clicked(self):
+
         self.current_index = self.current_index + 1
         self.update_frame_selection_options()
         self.index_updated.emit(self.current_index)
         
+    @Slot()
     def on_button_frame_selection_last_clicked(self):
+
         self.current_index = self.max_index
         self.update_frame_selection_options()
         self.index_updated.emit(self.current_index)
-        
-    ### FRAME SELECTION UPDATES ###
 
     def update_frame_selection_limits(self, min_index:int, max_index:int):
+
         self.min_index = min_index
         self.max_index = max_index
         self.current_index = self.min_index
@@ -168,8 +165,6 @@ class FrameSelectionWidget(QWidget):
         else:
             self.button_frame_selection_previous.setEnabled(False)
 
-    ### SETs ###
-
     def set_current_index(self, new_current_index:int):
 
         if self.is_valid_idx(new_current_index):
@@ -178,8 +173,6 @@ class FrameSelectionWidget(QWidget):
             self.index_updated.emit(self.current_index)
         else:
             pass
-
-    ### GETs ### 
 
     def get_current_index(self) -> int:
 

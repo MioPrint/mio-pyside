@@ -1,6 +1,6 @@
 
-from .tabs_with_order_memory import TabsWithOrderMemory
+from .tabs_with_order_memory import QTabsWithOrderMemory
 
 __all__ = [
-    "TabsWithOrderMemory",
+    "QTabsWithOrderMemory",
     ]

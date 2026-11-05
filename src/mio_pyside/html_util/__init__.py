@@ -1,7 +1,7 @@
 
-from .basic_html_document import BasicHtmlDocumentWidget
-from .content_list_html_document import ContentListHtmlDocumentWidget
+from .basic_html_document import QBasicHtmlDocumentWidget
+from .content_list_html_document import QContentListHtmlDocumentWidget
 
 __all__ = [
-    "BasicHtmlDocumentWidget", "ContentListHtmlDocumentWidget"
+    "QBasicHtmlDocumentWidget", "QContentListHtmlDocumentWidget"
     ]

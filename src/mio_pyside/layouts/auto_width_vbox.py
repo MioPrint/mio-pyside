@@ -3,13 +3,10 @@ from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 
-class AutoWidthVBoxLayout(QVBoxLayout):
+class QAutoWidthVBoxLayout(QVBoxLayout):
 
-    """
-    A custom layout that automatically adjusts the width of all child widgets
-    based on the largest widget width.
-    """
     def __init__(self, *args, **kwargs):
+
         super().__init__(*args, **kwargs)
 
     def setGeometry(self, rect):

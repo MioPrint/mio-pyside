@@ -1,14 +1,14 @@
 
 from PySide6.QtWidgets import *
-from PySide6.QtGui import *
 from PySide6.QtCore import *
+from PySide6.QtGui import *
 
-class TabsWithOrderMemory(QTabWidget):
+class QTabsWithOrderMemory(QTabWidget):
 
     def __init__(self, 
-            memory_dict:dict,
-            memory_key:str,
-            parent:QWidget=None,
+            memory_dict : dict,
+            memory_key  : str,
+            parent      : QWidget = None,
             *args, **kwargs
             ):
         

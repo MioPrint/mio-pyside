@@ -1,6 +1,6 @@
 
-from .data_dict_treeview import DataDictTreeView, print_data_dict
+from .data_dict_treeview import QDataDictTreeView, print_data_dict
 
 __all__ = [
-    "DataDictTreeView", "print_data_dict",
+    "QDataDictTreeView", "print_data_dict",
     ]

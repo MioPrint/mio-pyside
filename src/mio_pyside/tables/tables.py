@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 
-import sys, os, logging, time, typing, json
-
-from PySide6.QtCore import *
 from PySide6.QtWidgets import *
+from PySide6.QtCore import *
 from PySide6.QtGui import *
+
+import os, logging
 
 from ..buttons import QLoadFileButton, QSaveFileButton
 
@@ -22,15 +21,15 @@ class QBasicTableView(QTableView):
     dataframe_updated = Signal(pd.DataFrame)
     
     def __init__(self, 
-            editable_table:bool= False, 
-            transposed_display:bool= False, 
-            resize_columns:bool= True,
-            tight_on:bool= False,
-            scroll_bar_on:bool= True,
-            parent:QWidget=None
+            editable_table     : bool = False, 
+            transposed_display : bool = False, 
+            resize_columns     : bool = True,
+            tight_on           : bool = False,
+            scroll_bar_on      : bool = True,
+            parent             : QWidget = None,
             ):
         
-        super(QBasicTableView, self).__init__(parent)
+        super().__init__(parent=parent)
         
         self.editable_table = editable_table
         self.transposed_display = transposed_display
@@ -118,33 +117,27 @@ class QBasicTableView(QTableView):
         if emit:
             self.dataframe_updated.emit(self.dataframe)
 
-    ### events ###
-
     def wheelEvent(self, event: QWheelEvent):
 
+        step = 1 
+
         if event.modifiers() == Qt.KeyboardModifier.ShiftModifier:
-            #self.horizontalScrollBar().wheelEvent(event)
-            #self.horizontalScrollBar().setSingleStep(1)
             if event.angleDelta().y() > 0:
-                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - 1)# row_height)
+                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - step)
             else:
-                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + 1)# row_height)
+                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + step)
 
             if self.horizontalScrollBar().isVisible():
                 event.accept()
 
         else:
-            #self.verticalScrollBar().wheelEvent(event)
-            #self.verticalScrollBar().setSingleStep(1)
             if event.angleDelta().y() > 0:
-                self.verticalScrollBar().setValue(self.verticalScrollBar().value() - 1)# row_height)
+                self.verticalScrollBar().setValue(self.verticalScrollBar().value() - step)
             else:
-                self.verticalScrollBar().setValue(self.verticalScrollBar().value() + 1)# row_height)
+                self.verticalScrollBar().setValue(self.verticalScrollBar().value() + step)
             
             if self.verticalScrollBar().isVisible():
                 event.accept()
-
-    ### actions ### 
 
     def copy_selected_cells(self):
 
@@ -188,15 +181,15 @@ class QSheetDisplayWidget(QWidget):
     csv_loaded_from_file = Signal(str)
 
     def __init__(self, 
-            input_data:pd.DataFrame|np.ndarray= pd.DataFrame(),
-            window_title:str= ' ',
-            adjust_column_widths:bool= False,
-            is_transposed:bool= False,
-            enable_load_button:bool= False,
-            parent:QWidget= None,
+            input_data           : pd.DataFrame|np.ndarray= pd.DataFrame(),
+            window_title         : str  = " ",
+            adjust_column_widths : bool = False,
+            is_transposed        : bool = False,
+            enable_load_button   : bool = False,
+            parent               : QWidget = None,
             ):
         
-        super().__init__(parent= parent)
+        super().__init__(parent=parent)
 
         if parent is None:
             self.setWindowTitle(window_title)
@@ -205,14 +198,11 @@ class QSheetDisplayWidget(QWidget):
 
         self.is_transposed = is_transposed
 
-        ### WIDGETS ### 
         self.basic_table = QBasicTableView(resize_columns=False, tight_on=adjust_column_widths)
 
         if adjust_column_widths:
             self.basic_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-            #self.basic_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
 
-        ### STARTUP ### 
         if isinstance(input_data, pd.DataFrame):
             self.startup_via_df(input_data)
         elif isinstance(input_data, np.ndarray):
@@ -229,7 +219,6 @@ class QSheetDisplayWidget(QWidget):
         self.checkbox_transpose.setChecked(self.is_transposed)
         self.checkbox_transpose.clicked.connect(self.on_checkbox_transpose_clicked)
 
-        ### LAYOUT ### 
         layout_footer = QHBoxLayout()
         layout_footer.addWidget(self.checkbox_transpose, alignment=Qt.AlignmentFlag.AlignRight)
         layout_footer.addWidget(self.button_load_table_from_csv, alignment=Qt.AlignmentFlag.AlignRight)
@@ -264,9 +253,6 @@ class QSheetDisplayWidget(QWidget):
     @Slot(str)
     def on_button_save_table_to_csv_click(self, input_path:str):
         
-        #save_name = 'table' + '.csv'
-        #input_path = str(QFileDialog.getSaveFileName(self, 'Save Table to .csv File', os.path.join(src.path_src,'interface_maker\\csvs',save_name), '(*.csv)')[0])
-        #input_path = str(QFileDialog.getSaveFileName(self, 'Save Table to .csv File', os.path.join(src.folder_path, save_name), '(*.csv)')[0])
         if input_path != '':
             self.df.to_csv(input_path, index=False)
             logging.info(f' table saved to {input_path}')
@@ -276,12 +262,8 @@ class QSheetDisplayWidget(QWidget):
     @Slot(str)
     def on_button_load_table_from_csv_click(self, input_path:str):
 
-        #input_path = str(QFileDialog.getOpenFileName(self, 'Find Table .csv File', os.path.join(src.path_src,'interface_maker\\csvs'), '(*.csv)')[0])
-        #input_path = str(QFileDialog.getOpenFileName(self, 'Find Table .csv File', os.path.join(src.folder_path), '(*.csv)')[0])
         if input_path != '':
-
             self.basic_table.read_dataframe_from_csv(input_path)
-            
             logging.info(f' loading csv done from {input_path}')
             self.csv_loaded_from_file.emit(input_path)
         else: 
@@ -309,16 +291,16 @@ class QBasicTableWidget(QWidget):
     dataframe_updated = Signal(pd.DataFrame)
 
     def __init__(self, 
-            editable_table:bool= False, 
-            transposed_display:bool= False, 
-            resize_columns:bool= True,
-            tight_on:bool= False,
-            scroll_bar_on:bool= True,
-            delimiter:str=',',
-            parent:QWidget= None,
+            editable_table     : bool = False, 
+            transposed_display : bool = False, 
+            resize_columns     : bool = True,
+            tight_on           : bool = False,
+            scroll_bar_on      : bool = True,
+            delimiter          : str  = ",",
+            parent             : QWidget = None,
             ):
         
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         self.editable_table = editable_table
         self.transposed_display = transposed_display
@@ -388,7 +370,6 @@ class QBasicTableWidget(QWidget):
         self.default_file_name = os.path.basename(csv_abspath)
         logging.info(f' table saved to {csv_abspath}')
 
-    #@src.wait_cursor_on_call()
     @Slot(str)
     def on_load_table_from_csv(self, csv_abspath:str):
 
@@ -410,11 +391,11 @@ class QBasicTableWidget(QWidget):
 class QWidgetsInTableWidget(QTableWidget):
 
     def __init__(self,
-            resize_columns:bool= True,
-            scroll_bar_on:bool= False
+            resize_columns : bool = True,
+            scroll_bar_on  : bool = False
             ):
 
-        super(QWidgetsInTableWidget, self).__init__()
+        super().__init__()
 
         self.resize_columns = resize_columns
 
@@ -556,8 +537,11 @@ class QWidgetsInTableWidget(QTableWidget):
 
 class QDisplayTableModelDataframe(QAbstractTableModel):
 
-    def __init__(self, init_dataframe:pd.DataFrame):
-        super(QDisplayTableModelDataframe, self).__init__()
+    def __init__(self, 
+            init_dataframe : pd.DataFrame,
+            ):
+        
+        super().__init__()
         
         self.df = init_dataframe
 
@@ -573,9 +557,6 @@ class QDisplayTableModelDataframe(QAbstractTableModel):
     def get_dataframe(self):
         return self.df
     
-    #def dataChanged(self, index_1, index_2):
-    #    pass
-
     def data(self, index:QModelIndex, role:int):
 
         if index.isValid():
@@ -637,8 +618,11 @@ class QDisplayTableModelDataframe(QAbstractTableModel):
 
 class QEditableTableModelDataframe(QAbstractTableModel):
 
-    def __init__(self, init_dataframe:pd.DataFrame):
-        super(QEditableTableModelDataframe, self).__init__()
+    def __init__(self, 
+            init_dataframe : pd.DataFrame,
+            ):
+        
+        super().__init__()
         
         self.df = init_dataframe
 
@@ -654,9 +638,6 @@ class QEditableTableModelDataframe(QAbstractTableModel):
     def get_dataframe(self):
         return self.df
     
-    #def dataChanged(self, index_1, index_2):
-    #    pass
-
     def data(self, index:QModelIndex, role:int):
 
         if index.isValid():

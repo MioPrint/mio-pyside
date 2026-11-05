@@ -1,6 +1,6 @@
 
-from .elide_label import ElideLabel
+from .elide_label import QElideLabel
 
 __all__ = [
-    "ElideLabel",
+    "QElideLabel",
     ]

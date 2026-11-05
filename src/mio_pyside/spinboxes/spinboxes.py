@@ -1,9 +1,11 @@
 
-import sys 
-import numpy as np 
+from PySide6.QtWidgets import *
+from PySide6.QtCore import *
+from PySide6.QtGui import *
 
-from PySide6.QtWidgets import QSpinBox, QDoubleSpinBox
-from PySide6.QtGui import QValidator
+import sys 
+
+import numpy as np 
 
 class QInt64SpinBox(QDoubleSpinBox):
 

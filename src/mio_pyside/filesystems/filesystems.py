@@ -1,9 +1,9 @@
 
-from dataclasses import dataclass, field, fields, asdict
-
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 from PySide6.QtGui import *
+
+from dataclasses import dataclass, field, fields, asdict
 
 from ..buttons import QLoadFolderButton
 from ..config import GLOBAL_WORKING_DIR, WorkingDir
@@ -15,23 +15,21 @@ class QFileAndFolderSelection(QWidget):
     selectedDirChanged   = Signal(list)
 
     def __init__(self,
-            local_working_dir   : WorkingDir= None,
+            local_working_dir         : WorkingDir = None,
             # --- Selection Settings --- #
-            selectable_row          : bool= True, 
-            single_selection        : bool= False,
+            selectable_row            : bool = True, 
+            single_selection          : bool = False,
             # --- Filter Settings --- #
-            file_extensions             : list[str]= [],
-            startswith_filter_strings   : str= "",
-            endswith_filter_strings     : str= "",
-            contains_filter_strings     : str= "",
+            file_extensions           : list[str] = [],
+            startswith_filter_strings : str = "",
+            endswith_filter_strings   : str = "",
+            contains_filter_strings   : str = "",
             # --- Other --- #
             scrollbar_on_the_left   : bool= False,
             parent:QWidget= None
             ):
 
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
         
         self.setMinimumSize(350, 200)
 
@@ -92,12 +90,10 @@ class QFileNavigationBar(QWidget):
 
     def __init__(self,
             local_working_dir : WorkingDir= None,
-            parent:QWidget= None
+            parent : QWidget = None
             ):
 
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
         
         global GLOBAL_WORKING_DIR
         self._local_working_dir = local_working_dir if local_working_dir is not None else GLOBAL_WORKING_DIR
@@ -200,12 +196,10 @@ class QFolderPathCombobox(QComboBox):
 
     def __init__(self,
             local_working_dir : WorkingDir= None,
-            parent:QWidget= None
+            parent : QWidget= None
             ):
 
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
 
         self.setEditable(True)
         self.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
@@ -262,20 +256,18 @@ class QFilterBar(QWidget):
 
     filterStringsUpdated = Signal(str,str,str)
     startswithUpdated = Signal(str)
-    containsUpdated   = Signal(str)
-    endswithUpdated   = Signal(str)
+    containsUpdated = Signal(str)
+    endswithUpdated = Signal(str)
 
     def __init__(self,
-            file_extensions             : list[str]= [],
-            startswith_filter_strings   : str= "",
-            contains_filter_strings     : str= "",
-            endswith_filter_strings     : str= "",
-            parent:QWidget= None,
+            file_extensions             : list[str] = [],
+            startswith_filter_strings   : str = "",
+            contains_filter_strings     : str = "",
+            endswith_filter_strings     : str = "",
+            parent                      : QWidget = None,
             ):
 
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
 
         self._file_extensions = file_extensions
 
@@ -336,26 +328,24 @@ files_through_filter = []
 class QFileTree(QWidget):
 
     selectedFilesChanged = Signal(list)
-    selectedDirChanged   = Signal(list)
+    selectedDirChanged = Signal(list)
 
     def __init__(self,
-            local_working_dir : WorkingDir       = None,
+            local_working_dir           : WorkingDir       = None,
             # --- Selection Settings --- #
-            selectable_row          : bool= True, 
-            single_selection        : bool= False,
+            selectable_row              : bool= True, 
+            single_selection            : bool= False,
             # --- Filter Settings --- #
             file_extensions             : list[str]= [],
             startswith_filter_strings   : str= "",
             contains_filter_strings     : str= "",
             endswith_filter_strings     : str= "",
             # --- Other --- #
-            scrollbar_on_the_left   : bool= False,
-            parent:QWidget= None
+            scrollbar_on_the_left       : bool= False,
+            parent                      : QWidget = None,
             ):
 
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
         
         global GLOBAL_WORKING_DIR
         self._local_working_dir = local_working_dir if local_working_dir is not None else GLOBAL_WORKING_DIR
@@ -430,9 +420,6 @@ class QFileTree(QWidget):
 
         root_index = self.model.setRootPath(root_path)
 
-        #self.proxy.setSourceModel(self.model)        
-        #self.tree.setModel(self.proxy)
-        
         self.tree.setRootIndex(root_index)
 
         self.selectedFilesChanged.emit([])
@@ -470,12 +457,12 @@ class QFileTree(QWidget):
 @dataclass
 class FileAndDirInfo:
 
-    abspath     : str
-    parentDir   : str = field(default="")
-    size        : int = field(default=0)
-    displaySize : str = field(default="")
-    checkState  : Qt.CheckState = field(default=Qt.CheckState.Unchecked)
-    isDir       : bool = field(default=False)
+    abspath         : str
+    parentDir       : str = field(default="")
+    size            : int = field(default=0)
+    displaySize     : str = field(default="")
+    checkState      : Qt.CheckState = field(default=Qt.CheckState.Unchecked)
+    isDir           : bool = field(default=False)
     directDirCount  : int = field(default=-1)
     directFileCount : int = field(default=-1)
     fullDirCount    : int = field(default=-1)
@@ -491,17 +478,15 @@ class QSelectableFileSystemModel(QFileSystemModel):
     selectedDirChanged   = Signal(list)
 
     def __init__(self, 
-            selectable_row          : bool= True, 
-            single_selection        : bool= False,
-            parent= None
+            selectable_row   : bool = True, 
+            single_selection : bool = False,
+            parent           : QObject = None
             ):
     
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
 
-        self._selectable_row        = selectable_row
-        self._single_selection      = single_selection
+        self._selectable_row = selectable_row
+        self._single_selection = single_selection
 
         self._data : dict[str, FileAndDirInfo] = {}
         self._last_index: QModelIndex | None = None
@@ -687,16 +672,14 @@ class QFileFilterProxy(QSortFilterProxyModel):
     }
 
     def __init__(self, 
-            file_extensions             : list[str]= [],
-            startswith_filter_strings   : str= "",
-            contains_filter_strings     : str= "",
-            endswith_filter_strings     : str= "",
-            parent:QObject= None,
+            file_extensions           : list[str] = [],
+            startswith_filter_strings : str = "",
+            contains_filter_strings   : str = "",
+            endswith_filter_strings   : str = "",
+            parent                    : QObject = None,
             ):
 
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
         
         self.setRecursiveFilteringEnabled(True)
         self.setDynamicSortFilter(True)
@@ -713,20 +696,7 @@ class QFileFilterProxy(QSortFilterProxyModel):
 
     def setSourceModel(self, sourceModel:QSelectableFileSystemModel):
 
-        #super().setSourceModel(None)
-
         return super().setSourceModel(sourceModel)
-
-        #QTimer.singleShot(0, lambda: super().setSourceModel(sourceModel))
-
-        self.invalidate()
-
-        #self._startswith = ""
-        #self._contains = ""
-        #self._endswith = ""
-
-        #self._sort_mode = "name" # 'name', 'size', 'type', 'date'
-        #self._sort_order = Qt.SortOrder.AscendingOrder
 
     # --- Filtering --- #
 
@@ -751,15 +721,9 @@ class QFileFilterProxy(QSortFilterProxyModel):
         parent_info = model.fileInfo(source_parent)
         file_info = model.fileInfo(index)
 
-        #parent_path = parent_info.absoluteFilePath()
-
         name = file_info.fileName()
         ext = file_info.suffix()
         path = file_info.absoluteFilePath()
-
-        # print(ext, self._file_extensions, ext == "", bool(self._file_extensions), ext in self._file_extensions)
-
-        # print(parent_path in model_root_path, file_info.isRoot() and model_root_path != "",  model_root_path, parent_path, path, )
 
         if path in model_root_path:
             if path in model._data:
@@ -843,12 +807,10 @@ class QFileFilterProxy(QSortFilterProxyModel):
 class QFileSystemTreeView(QTreeView):
 
     def __init__(self,
-            parent:QWidget= None,
+            parent : QWidget = None,
             ):
 
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
 
         self.setAnimated(True)
         self.setAlternatingRowColors(True)

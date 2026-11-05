@@ -1,13 +1,13 @@
 
 from PySide6.QtWidgets import *
-from PySide6.QtGui import *
 from PySide6.QtCore import *
+from PySide6.QtGui import *
 
-class ScrollAreaLayoutContainer(QScrollArea):
+class QScrollAreaLayoutContainer(QScrollArea):
 
     def __init__(self, 
-            layout:QLayout,
-            parent:QWidget= None,
+            layout : QLayout,
+            parent : QWidget = None,
             ):
         
         super().__init__(parent)
@@ -15,7 +15,7 @@ class ScrollAreaLayoutContainer(QScrollArea):
         self.setWidgetResizable(True) 
         self.setFrameShape(QFrame.Shape.NoFrame)
 
-        palette = self.palette() #QPalette()
+        palette = self.palette() # QPalette()
         window_color = palette.color(QPalette.ColorRole.Window)
         window_color.setAlpha(0)
         palette.setColor(QPalette.ColorRole.Window, window_color)
@@ -27,21 +27,23 @@ class ScrollAreaLayoutContainer(QScrollArea):
 
     def wheelEvent(self, event:QWheelEvent):
 
+        step = 20
+
         if event.modifiers() == Qt.KeyboardModifier.ShiftModifier:
             #self.horizontalScrollBar().wheelEvent(event)
             if event.angleDelta().y() > 0:
-                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - 20)# row_height)
+                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - step)
             else:
-                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + 20)# row_height)
+                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + step)
         
             if self.horizontalScrollBar().isVisible():
                 event.accept()
         else:
             #self.verticalScrollBar().wheelEvent(event)
             if event.angleDelta().y() > 0:
-                self.verticalScrollBar().setValue(self.verticalScrollBar().value() - 20)# row_height)
+                self.verticalScrollBar().setValue(self.verticalScrollBar().value() - step)
             else:
-                self.verticalScrollBar().setValue(self.verticalScrollBar().value() + 20)# row_height)
+                self.verticalScrollBar().setValue(self.verticalScrollBar().value() + step)
     
             if self.verticalScrollBar().isVisible():
                 event.accept()

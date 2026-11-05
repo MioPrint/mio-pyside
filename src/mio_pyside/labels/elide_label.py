@@ -3,16 +3,16 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 
-class ElideLabel(QLabel):
+class QElideLabel(QLabel):
 
     def __init__(self,
-        text:str,
-        elide_mode:Qt.TextElideMode= Qt.TextElideMode.ElideMiddle,
-        max_width:int= 1000, 
-        parent:QWidget= None,
+        text       : str,
+        elide_mode : Qt.TextElideMode = Qt.TextElideMode.ElideMiddle,
+        max_width  : int = 1000, 
+        parent     : QWidget = None,
         ):
 
-        super(ElideLabel, self).__init__(text=text, parent=parent)
+        super().__init__(text=text, parent=parent)
 
         self.elide_mode = elide_mode
         self.max_width = max_width

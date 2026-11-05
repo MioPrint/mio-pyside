@@ -1,11 +1,12 @@
 
-import sys, json
-from dataclasses import dataclass, field, fields, asdict
-import pandas as pd
-
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 from PySide6.QtGui import *
+
+import json
+from dataclasses import dataclass, field, fields, asdict
+
+import pandas as pd
 
 from ..buttons import QLoadFileButton, QSaveFileButton
 from ..spinboxes import QInt64SpinBox, QAnyDecimalDoubleSpinBox
@@ -16,24 +17,21 @@ class QJsonTreeWidget(QWidget):
 
     contentEdited = Signal(object)
     selectionChanged = Signal(object)
-
     selectedJsonItemsChanged = Signal(list)
 
     def __init__(self,
-            init_json_path      : str= "" ,
-            local_working_dir   : WorkingDir= None,
+            init_json_path        : str = "" ,
+            local_working_dir     : WorkingDir = None,
             # --- Selection Settings --- #
-            selectable_row          : bool= True, 
-            single_selection        : bool= False,
+            selectable_row        : bool = True, 
+            single_selection      : bool = False,
             # --- Other --- #
-            scrollbar_on_the_left   : bool= False,
-            header_labels           : list= [],
-            parent:QWidget= None
+            scrollbar_on_the_left : bool = False,
+            header_labels         : list = [],
+            parent                : QWidget = None
             ):
 
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
 
         self.setMinimumSize(350, 200)
 
@@ -66,12 +64,6 @@ class QJsonTreeWidget(QWidget):
         self.tree = QJsonTreeView(parent= self)
         self.tree.setModel(self.model)
 
-        # --- #
-
-        #self.model.appendRow("Option A", "Alpha", checked=True)
-        #self.model.appendRow("Option B", "Beta", checked=False)
-        #self.model.appendRow("Option C", "Gamma", checked=True)
-        
         # --- Layout --- #
 
         layout_main_v = QVBoxLayout()
@@ -92,14 +84,14 @@ class QJsonTreeWidget(QWidget):
 class QJsonKeyItem(QStandardItem):
 
     def __init__(self,
-            key        : str,
-            dataType   : type,
-            checkable  : bool = False,
-            checked    : bool = False,
-            editable   : bool = False,
-            selectable : bool = True,
-            enabled    : bool = True,
-            isTable    : bool = False,
+            key          : str,
+            dataType     : type,
+            checkable    : bool = False,
+            checked      : bool = False,
+            editable     : bool = False,
+            selectable   : bool = True,
+            enabled      : bool = True,
+            isTable      : bool = False,
             isTransposed : bool = False,
             ):
 
@@ -164,19 +156,17 @@ class QJsonModel(QStandardItemModel):
     selectedJsonItemsChanged = Signal(list)
 
     def __init__(self, 
-            init_json_path   : str= "" ,
-            selectable_row   : bool= True, 
-            single_selection : bool= False,
-            header_labels    : list[str]= [],
-            transpose_arrays : bool= True,
-            editable_keys    : bool= False,
-            editable_values  : bool= True,
-            parent= None,
+            init_json_path   : str  = "" ,
+            selectable_row   : bool = True, 
+            single_selection : bool = False,
+            header_labels    : list[str] = [],
+            transpose_arrays : bool = True,
+            editable_keys    : bool = False,
+            editable_values  : bool = True,
+            parent           : QObject = None,
             ):
     
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
 
         self._selectable_row    = selectable_row
         self._single_selection  = single_selection
@@ -391,12 +381,10 @@ class QJsonModel(QStandardItemModel):
 class QJsonTreeView(QTreeView):
 
     def __init__(self,
-            parent:QWidget= None,
+            parent : QWidget = None,
             ):
 
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
 
         self.setAnimated(True)
         self.setAlternatingRowColors(True)
@@ -436,20 +424,23 @@ class QJsonTreeView(QTreeView):
 
     def wheelEvent(self, event:QWheelEvent):
 
+        step_h = 10
+        step_v = 1
+
         if event.modifiers() == Qt.KeyboardModifier.ShiftModifier:
             if event.angleDelta().y() > 0:
-                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - 10)# row_height)
+                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - step_h)
             else:
-                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + 10)# row_height)
-        
+                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + step_h)
+                
             if self.horizontalScrollBar().isVisible():
                 event.accept()
 
         else:
             if event.angleDelta().y() > 0:
-                self.verticalScrollBar().setValue(self.verticalScrollBar().value() - 1)# row_height)
+                self.verticalScrollBar().setValue(self.verticalScrollBar().value() - step_v)
             else:
-                self.verticalScrollBar().setValue(self.verticalScrollBar().value() + 1)# row_height)
+                self.verticalScrollBar().setValue(self.verticalScrollBar().value() + step_v)
     
             if self.verticalScrollBar().isVisible():
                 event.accept()
@@ -551,7 +542,7 @@ class QJsonItemDelegate(QStyledItemDelegate):
 
         if isinstance(editor, QCheckBox):
 
-            checkbox_size = editor.sizeHint() #40  # Adjust the size of the checkbox as needed
+            checkbox_size = editor.sizeHint()
             x = rect.x() + (rect.width() - checkbox_size.width()) // 2
             y = rect.y() + (rect.height() - checkbox_size.height()) // 2
             checkbox_rect = QRect(x, y, checkbox_size.width(), checkbox_size.height())
@@ -563,7 +554,5 @@ class QJsonItemDelegate(QStyledItemDelegate):
             rect = rect.adjusted(-2, -2, 2, 2)
             editor.setGeometry(rect)
             return
-
-        #editor.setGeometry(option.rect)
 
         super().updateEditorGeometry(editor, option, index)

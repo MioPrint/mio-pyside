@@ -1,8 +1,8 @@
 
-from .collapsible_box import CollapsibleBox
-from .scrollarea_for_collapsible_box import ScrollAreaForCollapsibleBoxes
-from .scrollarea_layout_container import ScrollAreaLayoutContainer
+from .collapsible_box import QCollapsibleBox
+from .scrollarea_for_collapsible_box import QScrollAreaForCollapsibleBoxes
+from .scrollarea_layout_container import QScrollAreaLayoutContainer
 
 __all__ = [
-    "CollapsibleBox", "ScrollAreaForCollapsibleBoxes", "ScrollAreaLayoutContainer"
+    "QCollapsibleBox", "QScrollAreaForCollapsibleBoxes", "QScrollAreaLayoutContainer"
     ]

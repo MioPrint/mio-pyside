@@ -1,9 +1,9 @@
 
-import sys, os, json, logging
-
 from PySide6.QtWidgets import *
-from PySide6.QtGui import *
 from PySide6.QtCore import *
+from PySide6.QtGui import *
+
+import sys, os, logging
 
 import numpy as np
 
@@ -14,13 +14,13 @@ from ..colors.palette import color_amber_70p
 # --- Tree View --- #
 # ----------------- #
 
-class DataDictTreeView(QTreeView):
+class QDataDictTreeView(QTreeView):
 
     content_edited = Signal(dict)
     checkbox_selection_changed = Signal(dict)
     single_selection_changed = Signal(list)
 
-    """  DataDictTreeView description 
+    """  QDataDictTreeView description 
 
         Attributes: 
             data_dict : Dictionary containitg data for visualization / editing, see bellow 
@@ -70,26 +70,27 @@ class DataDictTreeView(QTreeView):
         """
 
     def __init__(self,
-            data_dict:dict= {},
-            headers_list:list= [],
-            editing_enabled_list:list= [],
-            spinbox_limits_dict:dict= {},
+    
+            data_dict            : dict = {},
+            headers_list         : list = [],
+            editing_enabled_list : list = [],
+            spinbox_limits_dict  : dict = {},
 
-            selectable_row:bool= False,
-            single_selection:bool= False,
-            select_parents_only:bool= False,
-            select_children_only:bool= False,
+            selectable_row       : bool = False,
+            single_selection     : bool = False,
+            select_parents_only  : bool = False,
+            select_children_only : bool = False,
 
-            right_click_menu:bool= True,
-            default_row_list:list= [],
+            right_click_menu : bool = True,
+            default_row_list : list = [],
             
-            money_format:bool= False,
+            money_format : bool = False,
 
-            parent:QWidget= None,
-            *args, **kwargs,
+            parent : QWidget = None,
+            *args, **kwargs
             ):
         
-        super(DataDictTreeView, self).__init__(parent)
+        super().__init__(parent=parent)
 
         self.data_dict = data_dict.copy()
         self.headers_list = headers_list.copy()
@@ -157,7 +158,7 @@ class DataDictTreeView(QTreeView):
 
         self.money_format =         kwargs.get('money_format', self.money_format)
 
-        self.tree_model:TreeModel = TreeModel(
+        self.tree_model:QTreeModel = QTreeModel(
             data_dict= self.data_dict, 
             headers_list= self.headers_list, 
             editing_enabled_list= self.editing_enabled_list,
@@ -171,14 +172,13 @@ class DataDictTreeView(QTreeView):
             parent_treeview= self,
             )
         
-        #self.tree_model.dataChanged.connect(self.data_changed)
         self.tree_model.content_changed.connect(self.content_changed)
         self.tree_model.checkbox_changed.connect(self.checkbox_changed)
         self.tree_model.single_item_selected.connect(self.single_item_selected)
 
         self.setModel(self.tree_model)
 
-        self.delegate = generic_treeview_delegate(
+        self.delegate = QTreeviewDelegate(
             money_format= self.money_format,
             parent= self,
             )
@@ -193,26 +193,25 @@ class DataDictTreeView(QTreeView):
 
         self.adjust_column_widths()
 
-    ### Signals ### 
-
+    @Slot()
     def content_changed(self):
 
         self.adjust_column_widths()
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
         self.data_dict = model.get_as_dict()
         self.content_edited.emit(self.data_dict.copy())
 
+    @Slot()
     def checkbox_changed(self):
 
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
         selected_data_dict = model.get_as_dict(only_selected=True)
         self.checkbox_selection_changed.emit(selected_data_dict.copy())
 
+    @Slot()
     def single_item_selected(self, item_data:list):
 
         self.single_selection_changed.emit(item_data)
-
-    ### Util ###
 
     def clear_treeview(self) -> None:
 
@@ -227,24 +226,21 @@ class DataDictTreeView(QTreeView):
             else:
                 self.resizeColumnToContents(column)
 
-    ### GETs ###
-
     def get_data_dict(self) -> dict:
 
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
         return model.get_as_dict().copy()
 
     def get_selected_data_dict(self) -> dict:
 
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
         return model.get_as_dict(only_selected=True).copy()
 
     def get_headers_list(self) -> list:
         
         return self.headers_list.copy()
 
-    ### Save ###
-
+    @Slot()
     def on_button_save_to_png_click(self):
 
         provided_path = '' 
@@ -260,12 +256,12 @@ class DataDictTreeView(QTreeView):
 
     def save_as_image(self, image_file_path:str, close_on_save:bool=True):
 
-        save_treeview = DataDictTreeView(
-            data_dict = self.data_dict,
-            headers_list = self.headers_list,
+        save_treeview = QDataDictTreeView(
+            data_dict            = self.data_dict,
+            headers_list         = self.headers_list,
             editing_enabled_list = self.editing_enabled_list,
-            selectable_row = self.selectable_row,
-            spinbox_limits_dict = self.spinbox_limits_dict,
+            selectable_row       = self.selectable_row,
+            spinbox_limits_dict  = self.spinbox_limits_dict,
             )
         
         save_treeview.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -293,29 +289,30 @@ class DataDictTreeView(QTreeView):
         else:
             save_treeview.show()
 
-    ### Events ###
-
     def wheelEvent(self, event:QWheelEvent):
+
+        step_h = 10
+        step_v = 1
 
         if event.modifiers() == Qt.KeyboardModifier.ShiftModifier:
             if event.angleDelta().y() > 0:
-                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - 10)# row_height)
+                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - step_h)
             else:
-                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + 10)# row_height)
+                self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + step_h)
         
             if self.horizontalScrollBar().isVisible():
                 event.accept()
 
         else:
             if event.angleDelta().y() > 0:
-                self.verticalScrollBar().setValue(self.verticalScrollBar().value() - 1)# row_height)
+                self.verticalScrollBar().setValue(self.verticalScrollBar().value() - step_v)
             else:
-                self.verticalScrollBar().setValue(self.verticalScrollBar().value() + 1)# row_height)
+                self.verticalScrollBar().setValue(self.verticalScrollBar().value() + step_v)
     
             if self.verticalScrollBar().isVisible():
                 event.accept()
 
-    ### Menu ###
+    # --- Right Click Menu --- #
 
     def open_menu(self, position:QPoint):
         
@@ -393,16 +390,14 @@ class DataDictTreeView(QTreeView):
 
         #self.selectionModel().clearCurrentIndex()
     
-    ### Child ###
-
     def insert_child(self, parent_index:QModelIndex, defaults_on:bool=False) -> None:
 
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
         parent_item:TreeItem = parent_index.internalPointer() if parent_index.internalPointer() is not None else model.root_item
 
         unavailable_names = [parent_item.child(number=idx).data(column=0) for idx in range(parent_item.child_count())]
 
-        child_dialog = NewChildDialog(
+        child_dialog = QNewChildDialog(
             unavailable_names= unavailable_names,
             parent= self,
             )
@@ -429,18 +424,16 @@ class DataDictTreeView(QTreeView):
 
         QApplication.restoreOverrideCursor()
 
-    ### Rows ###
-
     def insert_row(self, index:QModelIndex, index_offset:int) -> None:
         
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
         parent_index:QModelIndex = index.parent()
         parent_item:TreeItem = parent_index.internalPointer() if parent_index.internalPointer() is not None else model.root_item
         row_index:int = index.row() + index_offset
 
         unavailable_names = [parent_item.child(number=idx).data(column=0) for idx in range(parent_item.child_count())]
 
-        row_dialog = NewRowDialog(
+        row_dialog = QNewRowDialog(
             unavailable_names= unavailable_names,
             parent= self,
             )
@@ -467,7 +460,7 @@ class DataDictTreeView(QTreeView):
 
     def remove_row(self, index:QModelIndex) -> None:
 
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
         parent_index:QModelIndex = index.parent()
         row_index:int = index.row()
 
@@ -484,14 +477,12 @@ class DataDictTreeView(QTreeView):
         
         QApplication.restoreOverrideCursor()
 
-    ### Columns ###
-
     def insert_column(self, index:QModelIndex, index_offset:int) -> None:
 
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
         column_index:int = index.column() + index_offset
 
-        column_dialog = NewColumnDialog(parent=self)
+        column_dialog = QNewColumnDialog(parent=self)
         if column_dialog.exec_() == QDialog.DialogCode.Accepted:
             column_name = column_dialog.get_column_name()
         else:
@@ -514,7 +505,7 @@ class DataDictTreeView(QTreeView):
 
     def remove_column(self, index:QModelIndex) -> None:
         
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
         column_index:int = index.column()
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
@@ -529,11 +520,9 @@ class DataDictTreeView(QTreeView):
 
         QApplication.restoreOverrideCursor()
 
-    ### Cell ###
-
     def copy_value_to_all_columns(self, index:QModelIndex, cell_value) -> None:
 
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
         parent_index:QModelIndex = index.parent()
         row_index:int = index.row()
 
@@ -553,11 +542,11 @@ class DataDictTreeView(QTreeView):
 
         QApplication.restoreOverrideCursor()
 
-    ### Header ###
+    # --- Header --- #
 
     def edit_header(self, section:int):
 
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
 
         current_header_text = model.headerData(section, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole)
 
@@ -580,7 +569,7 @@ class DataDictTreeView(QTreeView):
 
     def set_header_data(self, section:int, editor:QLineEdit):
 
-        model:TreeModel = self.model()
+        model:QTreeModel = self.model()
 
         new_header_text = editor.text()
         model.setHeaderData(section, Qt.Orientation.Horizontal, new_header_text, Qt.ItemDataRole.EditRole)
@@ -591,14 +580,14 @@ class DataDictTreeView(QTreeView):
 # --- Menu Dialogs -- #
 # ------------------- #
 
-class NewChildDialog(QDialog):
+class QNewChildDialog(QDialog):
 
     def __init__(self,
-        unavailable_names:list=[],
-        parent:QWidget= None,
+        unavailable_names : list = [],
+        parent            : QWidget = None,
         ):
 
-        super(NewChildDialog, self).__init__(parent)
+        super().__init__(parent=parent)
 
         self.unavailable_names = unavailable_names
 
@@ -608,20 +597,13 @@ class NewChildDialog(QDialog):
         self.lineedit_new_child_name = QLineEdit(self)
         self.lineedit_new_child_name.textChanged.connect(self.on_lineedit_new_child_name_changed)
 
-        #self.dialog_buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, parent=self)
         self.dialog_buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok, parent=self)
         self.dialog_buttons.accepted.connect(self.accept)
         self.dialog_buttons.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
-        #self.dialog_buttons.rejected.connect(self.reject)
 
         layout_main_h = QHBoxLayout()
-        #layout_main_h.addWidget(QLabel('New Column Name:'))
         layout_main_h.addWidget(self.lineedit_new_child_name)
         layout_main_h.addWidget(self.dialog_buttons)
-
-        #layout_main_v = QVBoxLayout()
-        #layout_main_v.addLayout(layout_main_h)
-        #layout_main_v.addWidget(self.dialog_buttons)
 
         self.setLayout(layout_main_h)
     
@@ -641,14 +623,14 @@ class NewChildDialog(QDialog):
         
         return self.lineedit_new_child_name.text()
     
-class NewRowDialog(QDialog):
+class QNewRowDialog(QDialog):
 
     def __init__(self,
-        unavailable_names:list=[],
-        parent:QWidget= None,
+        unavailable_names : list = [],
+        parent            : QWidget = None,
         ):
 
-        super(NewRowDialog, self).__init__(parent)
+        super().__init__(parent=parent)
 
         self.unavailable_names = unavailable_names
 
@@ -658,20 +640,13 @@ class NewRowDialog(QDialog):
         self.lineedit_new_row_name = QLineEdit(self)
         self.lineedit_new_row_name.textChanged.connect(self.on_lineedit_new_row_name_changed)
 
-        #self.dialog_buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, parent=self)
         self.dialog_buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok, parent=self)
         self.dialog_buttons.accepted.connect(self.accept)
         self.dialog_buttons.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
-        #self.dialog_buttons.rejected.connect(self.reject)
 
         layout_main_h = QHBoxLayout()
-        #layout_main_h.addWidget(QLabel('New Column Name:'))
         layout_main_h.addWidget(self.lineedit_new_row_name)
         layout_main_h.addWidget(self.dialog_buttons)
-
-        #layout_main_v = QVBoxLayout()
-        #layout_main_v.addLayout(layout_main_h)
-        #layout_main_v.addWidget(self.dialog_buttons)
 
         self.setLayout(layout_main_h)
     
@@ -691,32 +666,25 @@ class NewRowDialog(QDialog):
         
         return self.lineedit_new_row_name.text()
     
-class NewColumnDialog(QDialog):
+class QNewColumnDialog(QDialog):
 
     def __init__(self,
-        parent:QWidget = None,
+        parent : QWidget = None,
         ):
 
-        super(NewColumnDialog, self).__init__(parent)
+        super().__init__(parent=parent)
 
         self.setWindowTitle('New Column Name')
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowContextHelpButtonHint)
 
         self.lineedit_new_column_name = QLineEdit(self)
 
-        #self.dialog_buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, parent=self)
         self.dialog_buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok, parent=self)
         self.dialog_buttons.accepted.connect(self.accept)
-        #self.dialog_buttons.rejected.connect(self.reject)
 
         layout_main_h = QHBoxLayout()
-        #layout_main_h.addWidget(QLabel('New Column Name:'))
         layout_main_h.addWidget(self.lineedit_new_column_name)
         layout_main_h.addWidget(self.dialog_buttons)
-
-        #layout_main_v = QVBoxLayout()
-        #layout_main_v.addLayout(layout_main_h)
-        #layout_main_v.addWidget(self.dialog_buttons)
 
         self.setLayout(layout_main_h)
     
@@ -728,27 +696,27 @@ class NewColumnDialog(QDialog):
 # --- Abstract Item Model --- #
 # --------------------------- #
 
-class TreeModel(QAbstractItemModel):
+class QTreeModel(QAbstractItemModel):
 
     content_changed = Signal()
     checkbox_changed = Signal()
     single_item_selected = Signal(list)
 
     def __init__(self,
-            data_dict:dict,
-            headers_list:list = ['',''],
-            editing_enabled_list:list= [],
-            spinbox_limits_dict:dict= {},
+            data_dict            : dict,
+            headers_list         : list = ['',''],
+            editing_enabled_list : list = [],
+            spinbox_limits_dict  : dict = {},
 
-            selectable_row:bool= False,
-            single_selection:bool= False,
-            select_parents_only:bool= False,
-            select_children_only:bool= False,
+            selectable_row       : bool = False,
+            single_selection     : bool = False,
+            select_parents_only  : bool = False,
+            select_children_only : bool = False,
 
-            parent_treeview:'DataDictTreeView'= None,
+            parent_treeview      : 'QDataDictTreeView' = None,
             ):
 
-        super(TreeModel, self).__init__(parent_treeview)
+        super().__init__(parent=parent_treeview)
 
         self.data_dict = data_dict.copy()
         self.headers_list = headers_list.copy()
@@ -764,8 +732,6 @@ class TreeModel(QAbstractItemModel):
 
         if not self.editing_enabled_list:
             self.editing_enabled_list = [False for column in self.headers_list]
-
-        # self.is_file_system_model = isinstance(parent_treeview, src.file_system_treeview)
 
         self.last_checked_item_index:QModelIndex = None
 
@@ -788,7 +754,7 @@ class TreeModel(QAbstractItemModel):
             root_tree_item:'TreeItem'= None,
             ):
     
-        def setup_row_via_list(self:TreeModel, tree_item:TreeItem, row_list:list):
+        def setup_row_via_list(self:QTreeModel, tree_item:TreeItem, row_list:list):
 
             if len(row_list) > self.root_item.column_count():
 
@@ -1198,11 +1164,11 @@ class TreeModel(QAbstractItemModel):
 class TreeItem:
     
     def __init__(self, 
-            data_list:list= None, 
-            parent:'TreeItem'= None,
-            selectable_row:bool= False,
-            select_parents_only:bool= False,
-            select_children_only:bool= False,
+            data_list            : list = None, 
+            selectable_row       : bool = False,
+            select_parents_only  : bool = False,
+            select_children_only : bool = False,
+            parent               : 'TreeItem' = None,
             ):
 
         self.item_data = data_list
@@ -1296,8 +1262,6 @@ class TreeItem:
 
         return True
 
-    ### SETs ###
-
     def set_item_data(self, column:int, value, role:int=None):
         
         if column < 0 or column >= len(self.item_data):
@@ -1331,8 +1295,6 @@ class TreeItem:
         self.max_values[column] = max_value 
 
         return True
-
-    ### GETs ###
 
     def data(self, column:int, role:int=None):
 
@@ -1459,14 +1421,14 @@ class TreeItem:
 # --- Styled Item Delegate --- #
 # ---------------------------- #
 
-class generic_treeview_delegate(QStyledItemDelegate):
+class QTreeviewDelegate(QStyledItemDelegate):
 
     def __init__(self, 
-            money_format:bool= False,
-            parent:DataDictTreeView= None,
+            money_format : bool = False,
+            parent       : QDataDictTreeView = None,
             ):
 
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         self.money_format = money_format
 
@@ -1485,7 +1447,7 @@ class generic_treeview_delegate(QStyledItemDelegate):
     def createEditor(self, parent:QWidget, option:QStyleOptionViewItem, index:QModelIndex):
 
         value = index.data()
-        model:TreeModel = index.model()
+        model:QTreeModel = index.model()
         column_name = model.headerData(index.column(), Qt.Orientation.Horizontal)
         item:TreeItem = model.get_item(index)
 
@@ -1584,7 +1546,7 @@ class generic_treeview_delegate(QStyledItemDelegate):
     def editorEvent(self, event:QEvent, model:QAbstractItemModel, option:QStyleOptionViewItem, index:QModelIndex):
 
         value = index.data(Qt.ItemDataRole.EditRole)
-        model:TreeModel = index.model()
+        model:QTreeModel = index.model()
         item:TreeItem = model.get_item(index)
         is_editable = item.is_editable(index.column())
 

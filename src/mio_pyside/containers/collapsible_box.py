@@ -3,26 +3,26 @@ from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 
-from .scrollarea_for_collapsible_box import ScrollAreaForCollapsibleBoxes
+from .scrollarea_for_collapsible_box import QScrollAreaForCollapsibleBoxes
 
-class CollapsibleBox(QWidget):
+class QCollapsibleBox(QWidget):
 
     box_has_collapsed = Signal()
     box_has_expanded = Signal()
     box_has_changed = Signal()
 
     def __init__(self, 
-            title= '', 
-            init_collapsed= True, 
-            direction= 'vertical', 
-            animate:bool= False,
-            minimum_width:int= None,
-            parent:QWidget= None,
+            title          : str  = "", 
+            init_collapsed : bool = True, 
+            direction      : str  = "vertical", 
+            animate        : bool = False,
+            minimum_width  : int  = None,
+            parent         : QWidget = None,
             ):
 
-        super(CollapsibleBox, self).__init__(parent)
+        super().__init__(parent)
 
-        if isinstance(parent, ScrollAreaForCollapsibleBoxes):
+        if isinstance(parent, QScrollAreaForCollapsibleBoxes):
             self.box_has_changed.connect(parent.adjust_scroll_area_width)
 
         self.title = title
@@ -165,9 +165,11 @@ class CollapsibleBox(QWidget):
         self.update_contents_layout()
 
     def is_collapsed(self):
+
         return self.box_collapsed
     
     def is_expanded(self):
+        
         return not self.box_collapsed
     
     def set_widths_and_heights(self):
@@ -183,26 +185,26 @@ class CollapsibleBox(QWidget):
         else:
             self.setMinimumHeight(self.box_expanded_height)
             self.setMaximumHeight(self.box_expanded_height)
-            self.setMinimumWidth(self.box_expanded_width)# if self.minimum_width is None else max(self.minimum_width, self.box_expanded_width))
-            self.setMaximumWidth(self.box_expanded_width)# if self.minimum_width is None else max(self.minimum_width, self.box_expanded_width))
+            self.setMinimumWidth(self.box_expanded_width)
+            self.setMaximumWidth(self.box_expanded_width)
             self.content_area.setMaximumHeight(self.content_area_height)
             self.content_area.setMaximumWidth(self.content_area_width)
 
-class CollapsibleBox_template(CollapsibleBox):
+class QCollapsibleBox_template(QCollapsibleBox):
 
     def __init__(self,
-            parent:QWidget= None,
+            parent : QWidget = None,
             ):
 
-        super(CollapsibleBox_template, self).__init__(
-            title= 'CollapsibleBox_template', 
-            init_collapsed= True, 
-            direction= 'vertical', 
-            parent= parent,
+        super().__init__(
+            title          = 'QCollapsibleBox_template', 
+            init_collapsed = True, 
+            direction      = 'vertical', 
+            parent         = parent,
             )
 
-        #self.content_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        #self.content_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # self.content_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # self.content_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.init_widgets()
         self.init_layout()
@@ -216,13 +218,3 @@ class CollapsibleBox_template(CollapsibleBox):
         layout_collapsible_box_template = QGridLayout()
 
         self.set_contents_layout(layout_collapsible_box_template)
-
-    ### CONFIGURE WIDGETS ###
-    
-    ### WIDGET SIGNALS ###
-    
-    ### UPDATEs ###
-
-    ### SETs ###
-
-    ### GETs ###

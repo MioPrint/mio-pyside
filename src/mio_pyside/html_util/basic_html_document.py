@@ -1,27 +1,27 @@
 
-import os, logging
-
 from PySide6.QtWidgets import *
-from PySide6.QtGui import *
 from PySide6.QtCore import *
+from PySide6.QtGui import *
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
-from mio_pyside.config import GLOBAL_WORKING_DIR, WorkingDir
+import os, logging
+
+from mio_pyside.config import WorkingDir
 
 from .content_list_functions import get_html_string_from_content_list
 
-class BasicHtmlDocumentWidget(QWidget):
+class QBasicHtmlDocumentWidget(QWidget):
 
     html_updated = Signal(str)
 
     def __init__(self,
-            local_working_dir : WorkingDir= None,
-            parent:QWidget= None,
+            local_working_dir : WorkingDir = None,
+            parent            : QWidget = None,
             *args, **kwargs
             ):
 
-        super(BasicHtmlDocumentWidget, self).__init__(
-            parent= parent, 
+        super().__init__(
+            parent = parent, 
             *args, **kwargs
             )
 
@@ -36,7 +36,6 @@ class BasicHtmlDocumentWidget(QWidget):
     def init_widgets(self):
 
         self.web_engine_view_widget = QWebEngineView(parent=self)
-
         self.web_engine_view_widget.loadFinished.connect(self.on_load_finished)
 
         self.label_html_path = QLabel(self.html_path)
@@ -71,8 +70,7 @@ class BasicHtmlDocumentWidget(QWidget):
         layout_main_v.setContentsMargins(0,0,0,0)
         self.setLayout(layout_main_v)
 
-    ### Widget Signals ###
-
+    @Slot()
     def on_button_save_html_file_click(self):
 
         self.html_path = os.path.join(self._local_working_dir, 'basic_html_document.html') if self.html_path == '' else self.html_path
@@ -88,6 +86,7 @@ class BasicHtmlDocumentWidget(QWidget):
         else:
             logging.info(f' saving html cancelled')
 
+    @Slot()
     def on_button_load_html_file_click(self):
 
         provided_path = str(QFileDialog.getOpenFileName(self, 'Load .html File', self._local_working_dir, '(*.html)')[0])
@@ -98,6 +97,7 @@ class BasicHtmlDocumentWidget(QWidget):
         else: 
             logging.info(f' loading html cancelled')
 
+    @Slot()
     def on_button_reload_html_file_click(self):
 
         if self.html_path == '':
@@ -137,6 +137,7 @@ class BasicHtmlDocumentWidget(QWidget):
 
         self.html_updated.emit(self.html_string)
 
+    @Slot(bool)
     def on_load_finished(self, success:bool):
 
         if not success:
@@ -148,8 +149,6 @@ class BasicHtmlDocumentWidget(QWidget):
             fail_html_str = get_html_string_from_content_list([fail_string])
 
             self.web_engine_view_widget.setHtml(fail_html_str)
-
-    ### SETs ###
 
     def set_html_string(self, html_string, html_path):
         

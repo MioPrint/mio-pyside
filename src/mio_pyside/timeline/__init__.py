@@ -1,6 +1,6 @@
 
-from .frame_selection import FrameSelectionWidget
+from .frame_selection import QFrameSelectionWidget
 
 __all__ = [
-    "FrameSelectionWidget",
+    "QFrameSelectionWidget",
     ]

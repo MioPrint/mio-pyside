@@ -1,20 +1,20 @@
 
-import json, logging
-
 from PySide6.QtWidgets import *
-from PySide6.QtGui import *
 from PySide6.QtCore import *
+from PySide6.QtGui import *
+
+import json, logging
 
 from collections import namedtuple
 
-from ..config import GLOBAL_WORKING_DIR, WorkingDir
+from ..config import WorkingDir
 from ..buttons import QLoadFileButton, QSaveFileButton
 from ..utils import wait_cursor
 
 DictWidgetElement = namedtuple(
-    typename= "WidgetElement", 
-    field_names= ['default', 'items', 'min', 'max', 'enabled'], 
-    defaults= [None, [], None, None, True],
+    typename    = "WidgetElement", 
+    field_names = ['default', 'items', 'min', 'max', 'enabled'], 
+    defaults    = [None, [], None, None, True],
     )
 
 class QJsonArrayWidget(QWidget):
@@ -22,11 +22,11 @@ class QJsonArrayWidget(QWidget):
     array_changed = Signal(list)
 
     def __init__(self,
-            element:DictWidgetElement,
-            parent:QWidget= None,
+            element : DictWidgetElement,
+            parent  : QWidget = None,
             ):
         
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         self.element = element
         self.groupbox_main = QGroupBox("Array")
@@ -228,10 +228,10 @@ class QJsonDictWidget(QWidget):
     dict_changed = Signal(dict)
 
     def __init__(self,
-            init_dict:dict,
-            default_file_name:str= "settings.json",
-            local_working_dir:WorkingDir= None,
-            parent:QWidget= None,
+            init_dict         : dict,
+            default_file_name : str= "settings.json",
+            local_working_dir : WorkingDir= None,
+            parent            : QWidget= None,
             *args, **kwargs
             ):
         
@@ -274,9 +274,9 @@ class QJsonDictWidget(QWidget):
             )
 
     def _init_widgets_recursively(self, 
-            init_dict:dict[str,DictWidgetElement|dict], 
-            group_key:str= "Dict Widget",
-            parent:QWidget= None,
+            init_dict : dict[str,DictWidgetElement|dict], 
+            group_key : str = "Dict Widget",
+            parent    : QWidget = None,
             ) -> tuple[QWidget,dict]:
 
         widgets_dict = {}

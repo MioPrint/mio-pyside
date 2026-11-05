@@ -15,20 +15,20 @@ from .json_util import QJsonTreeWidget, QJsonDictWidget
 
 from .consols import QStartStopConsole
 
-from .tables import QBasicTableView, QBasicTableWidget
+from .tables import QBasicTableView, QBasicTableWidget, QSheetDisplayWidget, QWidgetsInTableWidget
 
-from .containers import CollapsibleBox, ScrollAreaForCollapsibleBoxes, ScrollAreaLayoutContainer
+from .containers import QCollapsibleBox, QScrollAreaForCollapsibleBoxes, QScrollAreaLayoutContainer
 
-from .timeline import FrameSelectionWidget
+from .timeline import QFrameSelectionWidget
 
-from .html_util import BasicHtmlDocumentWidget, ContentListHtmlDocumentWidget
+from .html_util import QBasicHtmlDocumentWidget, QContentListHtmlDocumentWidget
 
-from .layouts import AutoWidthVBoxLayout
+from .layouts import QAutoWidthVBoxLayout
 
-from .labels import ElideLabel
+from .labels import QElideLabel
 
-from .tabs import TabsWithOrderMemory
+from .tabs import QTabsWithOrderMemory
 
-from .trees import DataDictTreeView, print_data_dict
+from .trees import QDataDictTreeView, print_data_dict
 
 from .colors import *

@@ -10,15 +10,13 @@ class QStartStopConsole(QWidget):
     divider = "------------------------------------------------------------------------ \n"
 
     def __init__(self,
-            start_script:str,
-            stop_script:str="",
-            process_type:Literal["bash_command", "sh_file"]="bash_command",
-            parent:QWidget= None
+            start_script : str,
+            stop_script  : str = "",
+            process_type : Literal["bash_command", "sh_file"] = "bash_command",
+            parent       : QWidget = None,
             ):
 
-        super().__init__(
-            parent= parent,
-            )
+        super().__init__(parent=parent)
         
         self.start_script = start_script
         self.stop_script = stop_script

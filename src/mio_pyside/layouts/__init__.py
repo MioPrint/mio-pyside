@@ -1,6 +1,6 @@
 
-from .auto_width_vbox import AutoWidthVBoxLayout
+from .auto_width_vbox import QAutoWidthVBoxLayout
 
 __all__ = [
-    "AutoWidthVBoxLayout",
+    "QAutoWidthVBoxLayout",
     ]

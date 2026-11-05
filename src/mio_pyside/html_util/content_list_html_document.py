@@ -1,32 +1,24 @@
 
-import base64, imghdr
-
 from PySide6.QtWidgets import *
-from PySide6.QtGui import *
 from PySide6.QtCore import *
-from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtGui import *
 
-import numpy as np
-import pandas as pd
-
-from .basic_html_document import BasicHtmlDocumentWidget
+from .basic_html_document import QBasicHtmlDocumentWidget
 from .content_list_functions import get_html_string_from_content_list
 
-class ContentListHtmlDocumentWidget(BasicHtmlDocumentWidget):
+class QContentListHtmlDocumentWidget(QBasicHtmlDocumentWidget):
 
     def __init__(self,
-            parent:QWidget= None,
+            parent : QWidget = None,
             *args, **kwargs
             ):
 
         super().__init__(
-            parent= parent, 
+            parent = parent,
             *args, **kwargs
             )
 
         self.html_content_list = []
-
-    ### SETs ###
 
     @Slot(list)
     def set_html_content_list(self, html_content_list:list):
