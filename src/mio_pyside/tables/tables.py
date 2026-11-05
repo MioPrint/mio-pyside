@@ -5,6 +5,7 @@ from PySide6.QtGui import *
 
 import os, logging
 
+from ..settings import QMioAppSettingsManager
 from ..buttons import QLoadFileButton, QSaveFileButton
 
 import pandas as pd
@@ -180,7 +181,8 @@ class QSheetDisplayWidget(QWidget):
 
     csv_loaded_from_file = Signal(str)
 
-    def __init__(self, 
+    def __init__(self,
+            settings_manager     : QMioAppSettingsManager,
             input_data           : pd.DataFrame|np.ndarray= pd.DataFrame(),
             window_title         : str  = " ",
             adjust_column_widths : bool = False,
@@ -191,33 +193,60 @@ class QSheetDisplayWidget(QWidget):
         
         super().__init__(parent=parent)
 
+        self._settings_manager = settings_manager
+
         if parent is None:
             self.setWindowTitle(window_title)
         
-        self.df = pd.DataFrame()
+        self.df                   = pd.DataFrame()
+        self.input_data           = input_data
+        self.adjust_column_widths = adjust_column_widths
+        self.is_transposed        = is_transposed
+        self.enable_load_button   = enable_load_button
 
-        self.is_transposed = is_transposed
+        self.init_widgets()
+        self.init_layout()
 
-        self.basic_table = QBasicTableView(resize_columns=False, tight_on=adjust_column_widths)
+    def init_widgets(self):
 
-        if adjust_column_widths:
+        self.basic_table = QBasicTableView(
+            resize_columns = False,
+            tight_on       = self.adjust_column_widths,
+            )
+
+        if self.adjust_column_widths:
             self.basic_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
 
-        if isinstance(input_data, pd.DataFrame):
-            self.startup_via_df(input_data)
-        elif isinstance(input_data, np.ndarray):
-            self.startup_via_np_masked_array(input_data)
+        if isinstance(self.input_data, pd.DataFrame):
+            self.startup_via_df(self.input_data)
+        elif isinstance(self.input_data, np.ndarray):
+            self.startup_via_np_masked_array(self.input_data)
 
-        self.button_save_table_to_csv = QLoadFileButton(target_extension='.csv', button_text= ' Load to .csv ', parent= self)
-        self.button_save_table_to_csv.file_abspath_selected.connect(self.on_button_save_table_to_csv_click)
-
-        self.button_load_table_from_csv = QSaveFileButton(target_extension='.csv', button_text= ' Save to .csv ', parent= self)
-        self.button_load_table_from_csv.setEnabled(enable_load_button)
+        self.button_load_table_from_csv = QLoadFileButton(
+            settings_manager   = self._settings_manager,
+            button_text        = "Load from .csv",
+            update_working_dir = False,
+            target_extension   = '.csv',
+            parent             = self,
+            )
+        self.button_load_table_from_csv.setEnabled(self.enable_load_button)
         self.button_load_table_from_csv.file_abspath_selected.connect(self.on_button_load_table_from_csv_click)
+
+        self.button_save_table_to_csv = QSaveFileButton(
+            settings_manager   = self._settings_manager,
+            button_text        = "Save to .csv",
+            update_working_dir = False,
+            target_extension   = '.csv',
+            default_file_name  = "table",
+            parent             = self,
+            )
+        self.button_save_table_to_csv.file_abspath_selected.connect(self.on_button_save_table_to_csv_click)
 
         self.checkbox_transpose = QCheckBox('Transpose', parent=self)
         self.checkbox_transpose.setChecked(self.is_transposed)
         self.checkbox_transpose.clicked.connect(self.on_checkbox_transpose_clicked)
+
+    def init_layout(self):
 
         layout_footer = QHBoxLayout()
         layout_footer.addWidget(self.checkbox_transpose, alignment=Qt.AlignmentFlag.AlignRight)
@@ -315,26 +344,31 @@ class QBasicTableWidget(QWidget):
     def init_widgets(self):
 
         self.basic_table_view = QBasicTableView(
-            editable_table=self.editable_table,
-            transposed_display=self.transposed_display,
-            resize_columns=self.resize_columns,
-            tight_on=self.tight_on,
-            scroll_bar_on=self.scroll_bar_on,
-            parent=self
+            editable_table     = self.editable_table,
+            transposed_display = self.transposed_display,
+            resize_columns     = self.resize_columns,
+            tight_on           = self.tight_on,
+            scroll_bar_on      = self.scroll_bar_on,
+            parent             = self,
             )
         self.basic_table_view.dataframe_updated.connect(self.dataframe_updated_slot)
 
         self.button_load_table_from_csv = QLoadFileButton(
-            target_extension='.csv',
-            button_text=' Load from .csv ',
-            parent=self
+            settings_manager   = self._settings_manager,
+            button_text        = "Load from .csv",
+            update_working_dir = False,
+            target_extension   = '.csv',
+            parent             = self,
             )
         self.button_load_table_from_csv.file_abspath_selected.connect(self.on_load_table_from_csv)
 
         self.button_save_table_to_csv = QSaveFileButton(
-            target_extension='.csv',
-            button_text=' Save to .csv ',
-            parent=self
+            settings_manager   = self._settings_manager,
+            button_text        = "Save to .csv",
+            update_working_dir = True,
+            target_extension   = '.csv',
+            default_file_name  = "table",
+            parent             = self,
             )
         self.button_save_table_to_csv.file_abspath_selected.connect(self.on_save_table_to_csv)
 

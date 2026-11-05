@@ -7,7 +7,7 @@ import json, logging
 
 from collections import namedtuple
 
-from ..config import WorkingDir
+from ..settings import QMioAppSettingsManager
 from ..buttons import QLoadFileButton, QSaveFileButton
 from ..utils import wait_cursor
 
@@ -228,18 +228,18 @@ class QJsonDictWidget(QWidget):
     dict_changed = Signal(dict)
 
     def __init__(self,
+            settings_manager  : QMioAppSettingsManager,
             init_dict         : dict,
-            default_file_name : str= "settings.json",
-            local_working_dir : WorkingDir= None,
+            default_file_name : str = "data.json",
             parent            : QWidget= None,
             *args, **kwargs
             ):
         
         super().__init__(parent=parent, *args, **kwargs)
 
+        self._settings_manager = settings_manager
         self.init_dict = init_dict
-        self.default_file_name = default_file_name
-        self._local_working_dir = local_working_dir
+        self._default_file_name = default_file_name
 
         self.widgets_dict = {}
         self.values_dict = {}
@@ -252,20 +252,22 @@ class QJsonDictWidget(QWidget):
     def init_widgets(self):
 
         self.button_load_values_from_json_file = QLoadFileButton(
-            target_extension='.json',
-            local_working_dir=self._local_working_dir,
-            button_text= "Load from JSON file",
-            parent= self,
+            settings_manager   = self._settings_manager,
+            button_text        = "Load from JSON file",
+            update_working_dir = True,
+            target_extension   = '.json',
+            parent             = self,
             )
         self.button_load_values_from_json_file.file_abspath_selected.connect(self.load_from_file)
 
         self.button_save_values_to_json_file = QSaveFileButton(
-            default_file_name= self.default_file_name,
-            target_extension='.json',
-            local_working_dir=self._local_working_dir,
-            button_text= "Save to JSON file",
-            parent= self,
-        )
+            settings_manager   = self._settings_manager,
+            button_text        = "Save to JSON file",
+            update_working_dir = True,
+            target_extension   = '.json',
+            default_file_name  = self._default_file_name,
+            parent             = self,
+            )
         self.button_save_values_to_json_file.file_abspath_selected.connect(self.save_to_file)
 
         self.container_widget, self.widgets_dict = self._init_widgets_recursively(

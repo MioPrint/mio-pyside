@@ -8,9 +8,7 @@ from dataclasses import dataclass, field, fields, asdict
 
 import pandas as pd
 
-from ..buttons import QLoadFileButton, QSaveFileButton
 from ..spinboxes import QInt64SpinBox, QAnyDecimalDoubleSpinBox
-from ..config import GLOBAL_WORKING_DIR, WorkingDir
 from ..utils import wait_cursor
 
 class QJsonTreeWidget(QWidget):
@@ -21,7 +19,6 @@ class QJsonTreeWidget(QWidget):
 
     def __init__(self,
             init_json_path        : str = "" ,
-            local_working_dir     : WorkingDir = None,
             # --- Selection Settings --- #
             selectable_row        : bool = True, 
             single_selection      : bool = False,
@@ -36,9 +33,6 @@ class QJsonTreeWidget(QWidget):
         self.setMinimumSize(350, 200)
 
         self._init_json_path = init_json_path
-
-        global GLOBAL_WORKING_DIR
-        self._local_working_dir = local_working_dir if local_working_dir is not None else GLOBAL_WORKING_DIR
 
         self._selectable_row        = selectable_row
         self._single_selection      = single_selection 

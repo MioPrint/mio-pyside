@@ -3,10 +3,11 @@ from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 
+import os
 from dataclasses import dataclass, field, fields, asdict
 
+from ..settings import QMioAppSettingsManager
 from ..buttons import QLoadFolderButton
-from ..config import GLOBAL_WORKING_DIR, WorkingDir
 from ..utils import block_signals, wait_cursor, format_file_size
 
 class QFileAndFolderSelection(QWidget):
@@ -15,7 +16,7 @@ class QFileAndFolderSelection(QWidget):
     selectedDirChanged   = Signal(list)
 
     def __init__(self,
-            local_working_dir         : WorkingDir = None,
+            settings_manager          : QMioAppSettingsManager,
             # --- Selection Settings --- #
             selectable_row            : bool = True, 
             single_selection          : bool = False,
@@ -31,13 +32,9 @@ class QFileAndFolderSelection(QWidget):
 
         super().__init__(parent=parent)
         
-        self.setMinimumSize(350, 200)
-
-        global GLOBAL_WORKING_DIR
-        self._local_working_dir = local_working_dir if local_working_dir is not None else GLOBAL_WORKING_DIR
-
-        self._selectable_row        = selectable_row
-        self._single_selection      = single_selection 
+        self._settings_manager          = settings_manager
+        self._selectable_row            = selectable_row
+        self._single_selection          = single_selection 
         self._file_extensions           = file_extensions
         self._startswith_filter_strings = startswith_filter_strings
         self._endswith_filter_strings   = endswith_filter_strings
@@ -47,8 +44,8 @@ class QFileAndFolderSelection(QWidget):
         # --- Widgets --- #
 
         self.navigation_bar = QFileNavigationBar(
-            local_working_dir= self._local_working_dir, 
-            parent= self,
+            settings_manager = self._settings_manager,
+            parent           = self,
             )
 
         self.filter_bar = QFilterBar(
@@ -60,13 +57,13 @@ class QFileAndFolderSelection(QWidget):
             )
 
         self.file_tree_view = QFileTree(
-            local_working_dir       = self._local_working_dir,
-            selectable_row          = self._selectable_row,
-            single_selection        = self._single_selection,
-            file_extensions             = self._file_extensions,
-            startswith_filter_strings   = self._startswith_filter_strings,
-            endswith_filter_strings     = self._endswith_filter_strings,
-            contains_filter_strings     = self._contains_filter_strings,
+            settings_manager          = self._settings_manager,
+            selectable_row            = self._selectable_row,
+            single_selection          = self._single_selection,
+            file_extensions           = self._file_extensions,
+            startswith_filter_strings = self._startswith_filter_strings,
+            endswith_filter_strings   = self._endswith_filter_strings,
+            contains_filter_strings   = self._contains_filter_strings,
             scrollbar_on_the_left   = self._scrollbar_on_the_left,
             parent= self,
             )
@@ -77,6 +74,8 @@ class QFileAndFolderSelection(QWidget):
         self.file_tree_view.selectedDirChanged.connect(self.selectedDirChanged.emit)
 
         # --- Layout --- #
+
+        self.setMinimumSize(350, 200)
 
         layout_main_v = QVBoxLayout()
         layout_main_v.addWidget(self.navigation_bar)
@@ -89,22 +88,26 @@ class QFileAndFolderSelection(QWidget):
 class QFileNavigationBar(QWidget):
 
     def __init__(self,
-            local_working_dir : WorkingDir= None,
-            parent : QWidget = None
+            settings_manager : QMioAppSettingsManager,
+            parent           : QWidget = None
             ):
 
         super().__init__(parent=parent)
         
-        global GLOBAL_WORKING_DIR
-        self._local_working_dir = local_working_dir if local_working_dir is not None else GLOBAL_WORKING_DIR
-        self._local_working_dir.changed.connect(self.localPathUpdated)
+        self._settings_manager = settings_manager
+        self._working_QDir = QDir(self._settings_manager.working_dir)
+        self._settings_manager.working_dir_changed.connect(self.localPathUpdated)
 
-        self._history       : list = [self._local_working_dir.abspath()]
+        self._history       : list = [self._settings_manager.working_dir]
         self._history_index : int  = 1
 
         # --- Widgets --- #
 
-        self.button_folder_dialog = QLoadFolderButton(local_working_dir= self._local_working_dir, parent= self)
+        self.button_folder_dialog = QLoadFolderButton(
+            settings_manager   = self._settings_manager,
+            update_working_dir = True,
+            parent             = self,
+            )
 
         self.button_refresh = QPushButton(parent= self)
         self.button_refresh.setIcon(QIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)))
@@ -126,10 +129,13 @@ class QFileNavigationBar(QWidget):
         self.button_up = QPushButton(parent= self)
         self.button_up.setIcon(QIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp)))
         #self.button_up.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
-        self.button_up.setEnabled( not self._local_working_dir.dir().isRoot() )
+        self.button_up.setEnabled( not self._working_QDir.isRoot() )
         self.button_up.clicked.connect(self.on_up)
 
-        self.combobox_lineedit_path = QFolderPathCombobox(local_working_dir= self._local_working_dir, parent= self)
+        self.combobox_lineedit_path = QFolderPathCombobox(
+            settings_manager = self._settings_manager,
+            parent           = self,
+            )
         
         # --- Layout --- #
 
@@ -150,26 +156,26 @@ class QFileNavigationBar(QWidget):
     @Slot()
     def on_refresh(self):
 
-        self._history       : list = [self._local_working_dir.abspath()]
+        self._history       : list = [self._settings_manager.working_dir]
         self._history_index : int  = 1
-        self._local_working_dir.refresh()
+        self._settings_manager.emit(self._settings_manager.working_dir)
 
     @Slot()
     def on_undo(self):
 
         self._history_index -= 1
-        self._local_working_dir.setPath(self._history[self._history_index])
+        self._settings_manager.working_dir = self._history[self._history_index]
     
     @Slot()
     def on_redo(self):
 
         self._history_index += 1
-        self._local_working_dir.setPath(self._history[self._history_index])
+        self._settings_manager.working_dir = self._history[self._history_index]
     
     @Slot()
     def on_up(self):
 
-        parent_path = self._local_working_dir.parentDir()
+        parent_path = os.path.dirname(self._settings_manager.working_dir)
 
         if parent_path in self._history:
 
@@ -177,10 +183,12 @@ class QFileNavigationBar(QWidget):
             self._history.append(parent_path)
             self._history_index = len(self._history)-1
 
-        self._local_working_dir.setPath(parent_path)
+        self._settings_manager.working_dir = parent_path
 
     @Slot(str)
     def localPathUpdated(self, abspath:str):
+
+        self._working_QDir = QDir(self._settings_manager.working_dir)
 
         if not abspath in self._history:
             self._history.append(abspath)
@@ -190,31 +198,31 @@ class QFileNavigationBar(QWidget):
 
         self.button_undo.setEnabled( len(self._history) > 1 and self._history_index != 0 )
         self.button_redo.setEnabled( len(self._history) > 1 and self._history_index != len(self._history)-1 )
-        self.button_up.setEnabled( not self._local_working_dir.dir().isRoot() )
+        self.button_up.setEnabled( not self._working_QDir.isRoot() )
 
 class QFolderPathCombobox(QComboBox):
 
     def __init__(self,
-            local_working_dir : WorkingDir= None,
-            parent : QWidget= None
+            settings_manager : QMioAppSettingsManager,
+            parent           : QWidget= None
             ):
 
         super().__init__(parent=parent)
 
+        self._settings_manager = settings_manager
+        self._working_QDir = QDir(self._settings_manager.working_dir)
+        self._settings_manager.working_dir_changed.connect(self.localPathUpdated)
+        
         self.setEditable(True)
         self.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         #self.setMaximumWidth(500)
         self.setMaxVisibleItems(20)
         
-        global GLOBAL_WORKING_DIR
-        self._local_working_dir = local_working_dir if local_working_dir is not None else GLOBAL_WORKING_DIR
-        self._local_working_dir.changed.connect(self.localPathUpdated)
-
         self.activated.connect(self.on_item_activated)
         self.lineEdit().editingFinished.connect(self.on_lineedit_editing_finished)
 
-        self.localPathUpdated(self._local_working_dir.abspath())
+        self.localPathUpdated(self._settings_manager.working_dir)
 
     @Slot()
     def on_lineedit_editing_finished(self):
@@ -222,15 +230,15 @@ class QFolderPathCombobox(QComboBox):
         new_text = self.lineEdit().text()
 
         if not QDir(new_text).exists():
-            self.lineEdit().setText(self._local_working_dir.abspath())
+            self.lineEdit().setText(self._settings_manager.working_dir)
             return
 
-        self._local_working_dir.setPath(new_text)
+        self._settings_manager.working_dir = new_text
 
     @Slot(int)
     def on_item_activated(self, item_index:int):
 
-        self._local_working_dir.setPath(self.itemText(item_index))
+        self._settings_manager.working_dir = self.itemText(item_index)
 
     @Slot(str)
     @block_signals
@@ -238,7 +246,9 @@ class QFolderPathCombobox(QComboBox):
 
         self.clear()
 
-        _subfolder_paths = self._local_working_dir.dir().entryInfoList(QDir.Filter.Dirs | QDir.Filter.NoDotAndDotDot)
+        self._working_QDir = QDir(self._settings_manager.working_dir)
+
+        _subfolder_paths = self._working_QDir.entryInfoList(QDir.Filter.Dirs | QDir.Filter.NoDotAndDotDot)
         _subfolder_paths = [ fileInfo.absoluteFilePath() for fileInfo in _subfolder_paths ]
 
         _all_dirs = [abspath] + _subfolder_paths
@@ -260,11 +270,11 @@ class QFilterBar(QWidget):
     endswithUpdated = Signal(str)
 
     def __init__(self,
-            file_extensions             : list[str] = [],
-            startswith_filter_strings   : str = "",
-            contains_filter_strings     : str = "",
-            endswith_filter_strings     : str = "",
-            parent                      : QWidget = None,
+            file_extensions           : list[str] = [],
+            startswith_filter_strings : str = "",
+            contains_filter_strings   : str = "",
+            endswith_filter_strings   : str = "",
+            parent                    : QWidget = None,
             ):
 
         super().__init__(parent=parent)
@@ -331,7 +341,7 @@ class QFileTree(QWidget):
     selectedDirChanged = Signal(list)
 
     def __init__(self,
-            local_working_dir           : WorkingDir       = None,
+            settings_manager : QMioAppSettingsManager,
             # --- Selection Settings --- #
             selectable_row              : bool= True, 
             single_selection            : bool= False,
@@ -347,9 +357,9 @@ class QFileTree(QWidget):
 
         super().__init__(parent=parent)
         
-        global GLOBAL_WORKING_DIR
-        self._local_working_dir = local_working_dir if local_working_dir is not None else GLOBAL_WORKING_DIR
-        self._local_working_dir.changed.connect(self.localPathUpdated)
+        self._settings_manager = settings_manager
+        self._working_QDir = QDir(self._settings_manager.working_dir)
+        self._settings_manager.working_dir_changed.connect(self.localPathUpdated)
 
         self._selectable_row        = selectable_row
         self._single_selection      = single_selection
@@ -386,7 +396,7 @@ class QFileTree(QWidget):
 
         # --- #
 
-        root_path = self._local_working_dir.abspath()
+        root_path = self._settings_manager.working_dir
 
         root_index = self.model.setRootPath(root_path)
 

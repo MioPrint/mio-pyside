@@ -1,8 +1,4 @@
 
-from .config import GLOBAL_WORKING_DIR, WorkingDir
-
-from .utils import block_signals, wait_cursor, format_file_size, sanitize_xml_text_value, delete_layout
-
 from .assets import assets_rcc
 
 from .buttons import QLoadFolderButton, QLoadFileButton, QSaveFileButton
@@ -31,4 +27,8 @@ from .tabs import QTabsWithOrderMemory
 
 from .trees import QDataDictTreeView, print_data_dict
 
+from .settings import QMioAppSettingsManager
+
 from .colors import *
+
+from .utils import block_signals, wait_cursor, format_file_size, sanitize_xml_text_value, delete_layout, decode_geometry
