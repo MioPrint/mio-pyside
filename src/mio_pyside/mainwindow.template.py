@@ -19,8 +19,6 @@ class QMioMainWindow(QMainWindow):
         self.init_widgets()
         self.init_layout()
 
-        self.show()
-
     def init_widgets(self):
 
         pass
