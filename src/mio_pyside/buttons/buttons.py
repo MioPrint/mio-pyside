@@ -4,6 +4,7 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 
 import os
+from typing import Any
 
 from ..settings import QMioAppSettingsManager
 
@@ -14,6 +15,8 @@ class QLoadFolderButton(QPushButton):
 
     def __init__(self,
             settings_manager   : QMioAppSettingsManager,
+            settings_key       : str  = "working_dir",
+            settings_default   : Any  = None,
             button_text        : str  = "",
             update_working_dir : bool = False,
             parent             : QWidget = None,
@@ -24,7 +27,9 @@ class QLoadFolderButton(QPushButton):
             parent = parent,
             )
 
-        self._settings_manager = settings_manager
+        self._settings_manager   = settings_manager
+        self._settings_key       = settings_key
+        self._settings_default   = settings_default
         self._update_working_dir = update_working_dir
 
         self.setIcon(QIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_DirIcon)))
@@ -33,8 +38,8 @@ class QLoadFolderButton(QPushButton):
     @Slot()
     def on_button_click(self):
 
-        target_dir = self._settings_manager.working_dir
-
+        target_dir = self._settings_manager.get(self._settings_key, self._settings_default)
+        
         file_dialog = QFileDialog(self)
         file_dialog.setFileMode(QFileDialog.FileMode.Directory)
         file_dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
@@ -49,7 +54,7 @@ class QLoadFolderButton(QPushButton):
             self.folder_QDir_selected.emit(QDir(selected_directory))
 
             if self._update_working_dir:
-                self._settings_manager.working_dir = selected_directory
+                self._settings_manager.set(self._settings_key, selected_directory)
 
 class QLoadFileButton(QPushButton):
 
@@ -58,6 +63,8 @@ class QLoadFileButton(QPushButton):
 
     def __init__(self,
             settings_manager   : QMioAppSettingsManager,
+            settings_key       : str  = "working_dir",
+            settings_default   : Any  = None,
             button_text        : str  = "",
             update_working_dir : bool = False,
             target_extension   : str|list[str] = "", # with a dot
@@ -69,9 +76,11 @@ class QLoadFileButton(QPushButton):
             parent = parent,
             )
 
-        self._settings_manager = settings_manager
+        self._settings_manager   = settings_manager
+        self._settings_key       = settings_key
+        self._settings_default   = settings_default
         self._update_working_dir = update_working_dir
-        self._target_extension = target_extension
+        self._target_extension   = target_extension
 
         self.setIcon(QIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_FileIcon)))
         self.clicked.connect(self.on_button_click)
@@ -79,8 +88,8 @@ class QLoadFileButton(QPushButton):
     @Slot()
     def on_button_click(self):
 
-        target_dir = self._settings_manager.working_dir
-
+        target_dir = self._settings_manager.get(self._settings_key, self._settings_default)
+        
         file_dialog = QFileDialog(self)
         file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
         file_dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
@@ -103,8 +112,8 @@ class QLoadFileButton(QPushButton):
             self.file_QFile_selected.emit(QFile(selected_file))
 
             if self._update_working_dir:
-                self._settings_manager.working_dir = os.path.dirname(selected_file)
-
+                self._settings_manager.set(self._settings_key, os.path.dirname(selected_file))
+                
 class QSaveFileButton(QPushButton):
 
     file_abspath_selected = Signal(str)
@@ -112,6 +121,8 @@ class QSaveFileButton(QPushButton):
 
     def __init__(self,
             settings_manager   : QMioAppSettingsManager,
+            settings_key       : str  = "working_dir",
+            settings_default   : Any  = None,
             button_text        : str = "",
             update_working_dir : bool = False,
             target_extension   : str|list[str] = "", # with a dot
@@ -124,10 +135,12 @@ class QSaveFileButton(QPushButton):
             parent = parent,
             )
 
-        self._settings_manager = settings_manager
+        self._settings_manager   = settings_manager
+        self._settings_key       = settings_key
+        self._settings_default   = settings_default
         self._update_working_dir = update_working_dir
-        self._target_extension = target_extension
-        self._default_file_name = default_file_name
+        self._target_extension   = target_extension
+        self._default_file_name  = default_file_name
 
         self.setIcon(QIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_DialogSaveButton)))
         self.clicked.connect(self.on_button_click)
@@ -135,8 +148,8 @@ class QSaveFileButton(QPushButton):
     @Slot()
     def on_button_click(self):
 
-        target_dir = self._settings_manager.working_dir
-
+        target_dir = self._settings_manager.get(self._settings_key, self._settings_default)
+        
         file_dialog = QFileDialog(self)
         file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
         file_dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
@@ -167,4 +180,4 @@ class QSaveFileButton(QPushButton):
             self.file_QSaveFile_selected.emit(QSaveFile(selected_file))
 
             if self._update_working_dir:
-                self._settings_manager.working_dir = os.path.dirname(selected_file)
+                self._settings_manager.set(self._settings_key, os.path.dirname(selected_file))

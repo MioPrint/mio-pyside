@@ -254,7 +254,7 @@ class QDataDictTreeView(QTreeView):
         else:
             logging.info(f' saving treeview cancelled')
 
-    def save_as_image(self, image_file_path:str, close_on_save:bool=True):
+    def save_as_image(self, image_file_path:str, close_on_save:bool=False):
 
         save_treeview = QDataDictTreeView(
             data_dict            = self.data_dict,
@@ -267,27 +267,24 @@ class QDataDictTreeView(QTreeView):
         save_treeview.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         save_treeview.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
+        save_treeview.ensurePolished()
+        save_treeview.adjustSize()
+
+        QApplication.processEvents()
+
         save_treeview.setFixedSize(
             save_treeview.sizeHint().width() + 20,
             save_treeview.sizeHint().height() + 20,
             )
         
-        save_pixmap = QPixmap(
-            save_treeview.sizeHint().width() + 20,
-            save_treeview.sizeHint().height() + 20,
-            )
-        save_pixmap.fill()
+        QApplication.processEvents()
 
-        save_painter = QPainter(save_pixmap)
-        save_treeview.render(save_painter)
-        save_painter.end()
+        save_pixmap = save_treeview.grab(save_treeview.rect())
 
         save_pixmap.save(image_file_path)
 
         if close_on_save:
             save_treeview.close()
-        else:
-            save_treeview.show()
 
     def wheelEvent(self, event:QWheelEvent):
 

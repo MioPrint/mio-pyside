@@ -8,6 +8,7 @@ import os
 class QMioAppSettingsManager(QObject):
 
     working_dir_changed = Signal(str)
+    settings_changed = Signal(str, object)
 
     _instance = None
 
@@ -66,6 +67,9 @@ class QMioAppSettingsManager(QObject):
     @property
     def working_dir(self) -> str:
 
+        if self.app_settings.value("working_dir") is None:
+            self.app_settings.setValue("working_dir", self.default_dir)
+
         return self.app_settings.value("working_dir", self.default_dir, type=str)
 
     @working_dir.setter
@@ -80,3 +84,20 @@ class QMioAppSettingsManager(QObject):
 
             self.app_settings.setValue("working_dir", new_working_dir)
             self.working_dir_changed.emit(new_working_dir)
+
+    # --- get set settings --- #
+
+    def get(self, key:str, default=None):
+
+        if key == "working_dir":
+            return self.working_dir
+
+        if not self.app_settings.contains(key):
+            self.app_settings.setValue(key, default)
+
+        return self.app_settings.value(key, default)
+
+    def set(self, key:str, value):
+
+        self.app_settings.setValue(key, value)
+        self.settings_changed(key, value)
