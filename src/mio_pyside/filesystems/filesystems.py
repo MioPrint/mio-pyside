@@ -158,7 +158,7 @@ class QFileNavigationBar(QWidget):
 
         self._history       : list = [self._settings_manager.working_dir]
         self._history_index : int  = 1
-        self._settings_manager.emit(self._settings_manager.working_dir)
+        self._settings_manager.working_dir_changed.emit(self._settings_manager.working_dir)
 
     @Slot()
     def on_undo(self):

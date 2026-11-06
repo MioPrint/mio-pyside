@@ -100,4 +100,4 @@ class QMioAppSettingsManager(QObject):
     def set(self, key:str, value):
 
         self.app_settings.setValue(key, value)
-        self.settings_changed(key, value)
+        self.settings_changed.emit(key, value)
